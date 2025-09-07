@@ -1,0 +1,173 @@
+/* =========================
+   Base (mobile first)
+   ========================= */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+/* =========================
+   Variables (tema Panel)
+   ========================= */
+:root{
+  --fondo: #EAF6FF;     /* celeste general */
+  --menu: #F0F0F0;      /* menú lateral / tarjetas */
+  --panel-top: #FFFFFF; /* bloque superior ("Administrador"/"Usuario") */
+  --texto: #000000;     /* textos */
+  --borde: #E0E0E0;     /* líneas/bordes */
+}
+
+/* =========================
+   Ayudas reutilizables
+   ========================= */
+.centro { min-height: 100svh; display: grid; place-items: center; }
+.borde  { border: 1px solid var(--borde); }
+.bg-top { background: var(--panel-top); }
+
+.tarjeta {
+  background: var(--menu);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  padding: 24px;
+}
+@media (min-width: 768px) {
+  .tarjeta { padding: 28px; }
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 1rem;
+}
+.input::placeholder { color: #A3A3A3; }
+
+/* =========================
+   Layout del Panel (sidebar)
+   ========================= */
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100svh;
+}
+
+.sidebar {
+  background: var(--menu);
+  border-right: 1px solid var(--borde);
+  display: flex; flex-direction: column;
+  gap: 10px; padding: 12px;
+}
+
+.sb-top { padding: 10px; border-radius: 8px; }
+
+.sb-menu { display: flex; flex-direction: column; gap: 6px; }
+.sb-item {
+  padding: 10px; border-radius: 8px; cursor: pointer; user-select: none;
+  text-align: left; background: transparent; border: none; font: inherit;
+}
+.sb-item:hover { background: #e7e7e7; }
+
+.sb-logout {
+  margin-top: auto; padding: 10px;
+  border: 1px solid var(--borde); border-radius: 8px;
+  background: #fff; cursor: pointer;
+}
+.sb-logout:hover { background: #f6f6f6; }
+
+/* === Contenido principal === */
+.contenido {
+  background: var(--fondo);
+  display: block;
+  padding: 0 16px; /* respiración lateral */
+}
+.contenido > .contenedor-pagina {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =========================
+   Estructura páginas admin
+   ========================= */
+.contenedor-pagina { max-width: 1280px; margin: 24px auto; padding: 0; }
+.contenedor-pagina.ancho-xl { max-width: 1400px; } /* para tablas anchas si lo necesitas */
+
+.barra-pagina {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.titulo { margin: 0; }
+
+/* Formularios */
+.formulario .fila-form { display: grid; gap: 12px; } /* (por compatibilidad) */
+@media (min-width: 720px) {
+  .formulario .fila-form { grid-template-columns: repeat(3, 1fr); }
+}
+.grupo label { display: block; font-size: 14px; margin-bottom: 6px; }
+.grupo input, .grupo select, .grupo textarea {
+  width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;
+}
+
+/* Grid 2 columnas (forms) */
+.grid-form-2 { display: grid; gap: 12px; }
+@media (min-width: 900px) {
+  .grid-form-2 { grid-template-columns: 1fr 1fr; }
+}
+.grid-form-2 .grupo label { font-weight: 600; }
+
+/* Acciones centradas */
+.acciones-centro { display: flex; gap: 10px; justify-content: center; }
+
+/* Secciones */
+.cabecera-seccion {
+  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
+}
+.titulo-seccion { margin: 0; }
+
+.nota { color: #64748b; display: block; margin-top: 8px; }
+
+/* =========================
+   Botones
+   ========================= */
+.btn {
+  border: 1px solid rgba(0,0,0,.2);
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn:hover { box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.btn-primario { background: #0006BF; color: #fff; border-color: #0006BF; }
+.btn-secundario { background: #e2e8f0; }
+.btn-peligro { background: #fee2e2; border-color: #fecaca; }
+.btn-mini { padding: 6px 8px; font-size: 13px; }
+
+/* =========================
+   Tablas
+   ========================= */
+.tabla-responsive { overflow: auto; }
+.tabla-contenedor { width: 100%; overflow-x: auto; } /* usada en Monitoreo */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+.tabla th, .tabla td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal; /* default consistente (evita pisadas previas) */
+}
+.tabla thead th { font-weight: 600; font-size: 14px; }
+.sin-datos { text-align: center; color: #64748b; }
+.col-acciones { display: flex; gap: 6px; }
+.col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+

@@ -1,12 +1,13 @@
 // src/pages/admin/EmpresasAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../services/config"; // <- usa VITE_API_BASE
 
 /** Cliente axios con token + manejo 401 en un solo lugar */
 function api() {
   const token = localStorage.getItem("token_ncc");
   const instance = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: `${API_URL}/api`, // <- producción/desarrollo según VITE_API_BASE
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
@@ -14,7 +15,6 @@ function api() {
     (r) => r,
     (err) => {
       const status = err?.response?.status;
-      const data = err?.response?.data;
       if (status === 401) {
         alert("Tu sesión expiró. Vuelve a iniciar sesión.");
         localStorage.removeItem("token_ncc");
@@ -55,6 +55,7 @@ export default function EmpresasAdmin() {
 
   useEffect(() => {
     cargarTodo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function cargarTodo() {
@@ -91,7 +92,7 @@ export default function EmpresasAdmin() {
     );
   }, [empresas, filtro]);
 
-  // ======= VALIDACIONES LOCALES (no cambian la maqueta) =======
+  // ======= VALIDACIONES LOCALES =======
   function validaDuplicados(rutFormateado) {
     const rutCanon = limpiarRut(rutFormateado);
     // 1) RUT único en toda la plataforma
@@ -287,7 +288,9 @@ export default function EmpresasAdmin() {
           <thead>
             <tr>
               <th style={{ width: "40%" }}>Nombre de la empresa</th>
-              <th style={{ width: "20%" }} translate="no">RUT</th>
+              <th style={{ width: "20%" }} translate="no">
+                RUT
+              </th>
               <th style={{ width: "25%" }}>Minera</th>
               <th style={{ width: "15%" }}>Acciones</th>
             </tr>

@@ -1,32 +1,6 @@
 // src/pages/admin/EmpresasAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-import { API_URL } from "../../services/config"; // <- usa VITE_API_BASE
-
-/** Cliente axios con token + manejo 401 en un solo lugar */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  const instance = axios.create({
-    baseURL: `${API_URL}/api`, // <- producción/desarrollo según VITE_API_BASE
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-
-  instance.interceptors.response.use(
-    (r) => r,
-    (err) => {
-      const status = err?.response?.status;
-      if (status === 401) {
-        alert("Tu sesión expiró. Vuelve a iniciar sesión.");
-        localStorage.removeItem("token_ncc");
-        localStorage.removeItem("usuario_ncc");
-        window.location.href = "/";
-        return;
-      }
-      return Promise.reject(err);
-    }
-  );
-  return instance;
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 /** Helpers RUT (formato visual) */
 function limpiarRut(v = "") {
@@ -62,8 +36,8 @@ export default function EmpresasAdmin() {
     setCargando(true);
     try {
       const [resEmp, resMin] = await Promise.all([
-        api().get("/empresas"),
-        api().get("/mineras"),
+        api.get("/empresas"),
+        api.get("/mineras"),
       ]);
       setEmpresas(resEmp?.data?.data || []);
       setMineras(resMin?.data?.data || []);
@@ -135,13 +109,13 @@ export default function EmpresasAdmin() {
     setCargando(true);
     try {
       if (editando) {
-        await api().put(`/empresas/${editando}`, {
+        await api.put(`/empresas/${editando}`, {
           nombre_empresa: nombre,
           rut_empresa: rutAEnviar,
           id_minera: Number(idMinera),
         });
       } else {
-        await api().post("/empresas", {
+        await api.post("/empresas", {
           nombre_empresa: nombre,
           rut_empresa: rutAEnviar,
           id_minera: Number(idMinera),
@@ -173,7 +147,7 @@ export default function EmpresasAdmin() {
     if (!window.confirm("¿Seguro de eliminar la empresa?")) return;
     setCargando(true);
     try {
-      await api().delete(`/empresas/${id}`);
+      await api.delete(`/empresas/${id}`);
       await cargarTodo();
       if (editando === id) limpiar();
     } catch (err) {

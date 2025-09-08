@@ -1,53 +1,6 @@
 // src/pages/admin/SindicatosAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Cliente axios con token + manejo 401/409 en un solo lugar (front-only) */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  const instance = axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-
-  instance.interceptors.response.use(
-    (r) => r,
-    (err) => {
-      const status = err?.response?.status;
-      const data = err?.response?.data;
-
-      // 401 → sesión vencida o sin token
-      if (status === 401) {
-        alert("Tu sesión expiró o no tienes autorización. Vuelve a iniciar sesión.");
-        localStorage.removeItem("token_ncc");
-        localStorage.removeItem("usuario_ncc");
-        window.location.href = "/";
-        return Promise.reject(err);
-      }
-
-      // 409 → conflicto por dependencias
-      if (status === 409) {
-        const msg =
-          data?.mensaje ||
-          data?.error ||
-          "No se puede completar la acción porque el registro tiene dependencias.";
-        alert(msg);
-        return Promise.reject(null);
-      }
-
-      // Otros errores → mensaje genérico
-      const msg =
-        data?.mensaje ||
-        (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-        data?.error ||
-        "Error de API.";
-      alert(msg);
-      return Promise.reject(null);
-    }
-  );
-
-  return instance;
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 const TIPOS = ["Nacional", "Faena", "Interempresa"];
 
@@ -67,7 +20,7 @@ export default function SindicatosAdmin() {
   const cargar = async () => {
     setCargando(true);
     try {
-      const r = await api().get("/sindicatos"); // { ok:true, data:[...] }
+      const r = await api.get("/sindicatos"); // { ok:true, data:[...] }
       setSindicatos(r.data?.data || []);
     } finally {
       setCargando(false);
@@ -118,12 +71,14 @@ export default function SindicatosAdmin() {
     try {
       setCargando(true);
       if (editId) {
-        await api().put(`/sindicatos/${editId}`, payload);
+        await api.put(`/sindicatos/${editId}`, payload);
       } else {
-        await api().post("/sindicatos", payload);
+        await api.post("/sindicatos", payload);
       }
       await cargar();
       limpiar();
+    } catch (_err) {
+      // Errores 401/409 y otros ya los maneja el interceptor en services/api.js
     } finally {
       setCargando(false);
     }
@@ -143,22 +98,22 @@ export default function SindicatosAdmin() {
     if (!window.confirm(`¿Eliminar el sindicato "${s.nombre_sindicato}"?`)) return;
     try {
       setCargando(true);
-      await api().delete(`/sindicatos/${s.id_sindicato}`);
+      await api.delete(`/sindicatos/${s.id_sindicato}`);
       await cargar();
       if (editId === s.id_sindicato) limpiar();
-    } catch (_ignored) {
-      // Alert mostrado en el interceptor
+    } catch (_err) {
+      // Mensaje ya mostrado por el interceptor
     } finally {
       setCargando(false);
     }
   };
 
-  // ----- UI (misma línea visual de "Empresas") -----
+  // ----- UI -----
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
-      {/* FORMULARIO (filas flex, como Empresas) */}
+      {/* FORMULARIO */}
       <form
         onSubmit={onGuardar}
         style={{
@@ -219,7 +174,6 @@ export default function SindicatosAdmin() {
           </button>
         </div>
 
-        {/* Mensaje de validación simple (opcional) */}
         {Object.keys(errores).length > 0 && (
           <small className="nota" style={{ color: "#b91c1c" }}>
             Revisa los campos: {Object.keys(errores).join(", ")}.
@@ -245,7 +199,6 @@ export default function SindicatosAdmin() {
         <table className="tabla" style={{ width: "100%" }}>
           <thead>
             <tr>
-              {/* ID oculto para ganar espacio */}
               <th>Nombre</th>
               <th>Federación</th>
               <th>Tipo</th>
@@ -255,7 +208,6 @@ export default function SindicatosAdmin() {
           <tbody>
             {sindicatosFiltrados.map((s) => (
               <tr key={s.id_sindicato}>
-                {/* ID no se muestra */}
                 <td>{s.nombre_sindicato}</td>
                 <td>{s.federacion || "-"}</td>
                 <td>{s.tipo_sindicato || "-"}</td>

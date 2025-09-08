@@ -1,15 +1,6 @@
 // src/pages/admin/UsuariosAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Helper sencillo para pasar el token en cada request */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  return axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 export default function UsuariosAdmin() {
   // Datos
@@ -37,9 +28,9 @@ export default function UsuariosAdmin() {
     (async () => {
       try {
         setCargando(true);
-        const rRoles = await api().get("/roles");
+        const rRoles = await api.get("/roles");
         setRoles(rRoles.data?.data || []);
-        const rUsers = await api().get("/usuarios");
+        const rUsers = await api.get("/usuarios");
         setUsuarios(Array.isArray(rUsers.data) ? rUsers.data : []);
       } catch (e) {
         console.error("Error cargando datos:", e);
@@ -85,7 +76,7 @@ export default function UsuariosAdmin() {
 
   // --------- Acciones CRUD ----------
   const recargarUsuarios = async () => {
-    const r = await api().get("/usuarios");
+    const r = await api.get("/usuarios");
     setUsuarios(Array.isArray(r.data) ? r.data : []);
   };
 
@@ -96,7 +87,7 @@ export default function UsuariosAdmin() {
     try {
       setCargando(true);
       if (modo === "crear") {
-        await api().post("/usuarios", {
+        await api.post("/usuarios", {
           nombre: form.nombre.trim(),
           apellido: form.apellido.trim(),
           email: form.email.trim(),
@@ -105,7 +96,7 @@ export default function UsuariosAdmin() {
           id_rol: Number(form.id_rol),
         });
       } else {
-        await api().put(`/usuarios/${editId}`, {
+        await api.put(`/usuarios/${editId}`, {
           nombre: form.nombre.trim(),
           apellido: form.apellido.trim(),
           email: form.email.trim(),
@@ -145,7 +136,7 @@ export default function UsuariosAdmin() {
     if (!window.confirm("¿Eliminar este usuario?")) return;
     try {
       setCargando(true);
-      await api().delete(`/usuarios/${id}`);
+      await api.delete(`/usuarios/${id}`);
       await recargarUsuarios();
       if (editId === id) limpiar();
     } catch (err) {
@@ -277,7 +268,6 @@ export default function UsuariosAdmin() {
         <table className="tabla" style={{ width: "100%" }}>
           <thead>
             <tr>
-              {/* <th style={{ width: 70 }} translate="no">ID</th>  ← ocultado */}
               <th>Nombre</th>
               <th>Apellido</th>
               <th>Email</th>
@@ -289,7 +279,6 @@ export default function UsuariosAdmin() {
           <tbody>
             {usuariosFiltrados.map((u) => (
               <tr key={u.id_usuario}>
-                {/* <td>{u.id_usuario}</td>  ← ocultado */}
                 <td>{u.nombre}</td>
                 <td>{u.apellido}</td>
                 <td>{u.email}</td>
@@ -311,7 +300,6 @@ export default function UsuariosAdmin() {
             ))}
             {usuariosFiltrados.length === 0 && (
               <tr>
-                {/* colSpan actualizado: antes 7 (con ID), ahora 6 */}
                 <td className="sin-datos" colSpan={6}>
                   Sin resultados
                 </td>

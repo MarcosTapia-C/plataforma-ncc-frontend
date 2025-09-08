@@ -1,15 +1,6 @@
 // src/pages/admin/ListaNegociaciones.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Cliente axios con token */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  return axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 export default function ListaNegociaciones() {
   const [negociaciones, setNegociaciones] = useState([]);
@@ -21,7 +12,7 @@ export default function ListaNegociaciones() {
   const cargar = async () => {
     try {
       setCargando(true);
-      const r = await api().get("/negociaciones");
+      const r = await api.get("/negociaciones");
       setNegociaciones(Array.isArray(r.data) ? r.data : r.data?.data || []);
     } catch (err) {
       console.error("Error cargando negociaciones:", err);
@@ -123,14 +114,22 @@ export default function ListaNegociaciones() {
                 <td style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
                 <td>{formatoFecha(n.fecha_inicio)}</td>
                 <td>{formatoFecha(n.fecha_termino)}</td>
-                <td>{Number.isFinite(Number(n.dotacion_total)) ? n.dotacion_total : "-"}</td>
-                <td>{Number.isFinite(Number(n.personal_sindicalizado)) ? n.personal_sindicalizado : "-"}</td>
+                <td>
+                  {Number.isFinite(Number(n.dotacion_total)) ? n.dotacion_total : "-"}
+                </td>
+                <td>
+                  {Number.isFinite(Number(n.personal_sindicalizado))
+                    ? n.personal_sindicalizado
+                    : "-"}
+                </td>
                 <td>{formatoPorcentaje(n)}</td>
               </tr>
             ))}
             {negociacionesFiltradas.length === 0 && (
               <tr>
-                <td colSpan={10} className="sin-datos">Sin registros</td>
+                <td colSpan={10} className="sin-datos">
+                  Sin registros
+                </td>
               </tr>
             )}
           </tbody>

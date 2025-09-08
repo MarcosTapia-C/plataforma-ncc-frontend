@@ -1,38 +1,6 @@
 // src/pages/admin/NegociacionesAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Cliente axios con token + manejo 401 y mensajes */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  const instance = axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-
-  instance.interceptors.response.use(
-    (r) => r,
-    (err) => {
-      const status = err?.response?.status;
-      const data = err?.response?.data;
-      if (status === 401) {
-        alert("Tu sesión expiró. Vuelve a iniciar sesión.");
-        localStorage.removeItem("token_ncc");
-        localStorage.removeItem("usuario_ncc");
-        window.location.href = "/";
-      } else {
-        const msg =
-          data?.mensaje ||
-          (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-          data?.error ||
-          "Error de API.";
-        alert(msg);
-      }
-      return Promise.reject(err);
-    }
-  );
-  return instance;
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 /** Normaliza una negociación del backend a una fila plana para la tabla */
 function normalizarNeg(n) {
@@ -109,9 +77,9 @@ export default function NegociacionesAdmin() {
       setCargando(true);
       try {
         const [rEmp, rSin, rNeg] = await Promise.all([
-          api().get("/empresas"),
-          api().get("/sindicatos"),
-          api().get("/negociaciones"),
+          api.get("/empresas"),
+          api.get("/sindicatos"),
+          api.get("/negociaciones"),
         ]);
         const arrEmp = rEmp.data?.data || [];
         const arrSin = rSin.data?.data || [];
@@ -130,7 +98,9 @@ export default function NegociacionesAdmin() {
     () =>
       empresas.map((e) => ({
         id: e.id_empresa,
-        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${e.nombre_empresa}`,
+        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${
+          e.nombre_empresa
+        }`,
       })),
     [empresas]
   );
@@ -176,8 +146,8 @@ export default function NegociacionesAdmin() {
     if (!window.confirm("¿Eliminar esta negociación?")) return;
     setCargando(true);
     try {
-      await api().delete(`/negociaciones/${row.id}`);
-      const rNeg = await api().get("/negociaciones");
+      await api.delete(`/negociaciones/${row.id}`);
+      const rNeg = await api.get("/negociaciones");
       const arrNeg = (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
       setItems(arrNeg.map(normalizarNeg));
       if (editId === row.id) limpiar();
@@ -187,14 +157,32 @@ export default function NegociacionesAdmin() {
   };
 
   const validar = () => {
-    if (!form.id_empresa) { alert("Selecciona una Empresa."); return false; }
-    if (!form.id_sindicato) { alert("Selecciona un Sindicato."); return false; }
-    if (!String(form.contrato).trim()) { alert("El campo Contrato es obligatorio."); return false; }
-    if (form.dotacion_total !== "" && Number(form.dotacion_total) < 0) { alert("Dotación total debe ser ≥ 0."); return false; }
-    if (form.personal_sindicalizado !== "" && Number(form.personal_sindicalizado) < 0) { alert("Personal sindicalizado debe ser ≥ 0."); return false; }
+    if (!form.id_empresa) {
+      alert("Selecciona una Empresa.");
+      return false;
+    }
+    if (!form.id_sindicato) {
+      alert("Selecciona un Sindicato.");
+      return false;
+    }
+    if (!String(form.contrato).trim()) {
+      alert("El campo Contrato es obligatorio.");
+      return false;
+    }
+    if (form.dotacion_total !== "" && Number(form.dotacion_total) < 0) {
+      alert("Dotación total debe ser ≥ 0.");
+      return false;
+    }
+    if (form.personal_sindicalizado !== "" && Number(form.personal_sindicalizado) < 0) {
+      alert("Personal sindicalizado debe ser ≥ 0.");
+      return false;
+    }
     if (form.porcentaje_sindicalizado !== "") {
       const p = Number(form.porcentaje_sindicalizado);
-      if (isNaN(p) || p < 0 || p > 100) { alert("Porcentaje sindicalizado debe estar entre 0 y 100."); return false; }
+      if (isNaN(p) || p < 0 || p > 100) {
+        alert("Porcentaje sindicalizado debe estar entre 0 y 100.");
+        return false;
+      }
     }
     return true;
   };
@@ -219,11 +207,11 @@ export default function NegociacionesAdmin() {
     setCargando(true);
     try {
       if (editId) {
-        await api().put(`/negociaciones/${editId}`, payload);
+        await api.put(`/negociaciones/${editId}`, payload);
       } else {
-        await api().post("/negociaciones", payload);
+        await api.post("/negociaciones", payload);
       }
-      const rNeg = await api().get("/negociaciones");
+      const rNeg = await api.get("/negociaciones");
       const arrNeg = (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
       setItems(arrNeg.map(normalizarNeg));
       limpiar();
@@ -342,7 +330,9 @@ export default function NegociacionesAdmin() {
               className="input"
               type="date"
               value={form.vencimiento_contrato_comercial}
-              onChange={(e) => setForm({ ...form, vencimiento_contrato_comercial: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, vencimiento_contrato_comercial: e.target.value })
+              }
               placeholder="dd-mm-aaaa"
             />
           </div>
@@ -354,7 +344,8 @@ export default function NegociacionesAdmin() {
             <label>Dotación total</label>
             <input
               className="input"
-              type="number" min="0"
+              type="number"
+              min="0"
               placeholder="Dotación total"
               value={form.dotacion_total}
               onChange={(e) => setForm({ ...form, dotacion_total: e.target.value })}
@@ -365,10 +356,13 @@ export default function NegociacionesAdmin() {
             <label>Personal sindicalizado</label>
             <input
               className="input"
-              type="number" min="0"
+              type="number"
+              min="0"
               placeholder="Personal sindicalizado"
               value={form.personal_sindicalizado}
-              onChange={(e) => setForm({ ...form, personal_sindicalizado: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, personal_sindicalizado: e.target.value })
+              }
             />
           </div>
 
@@ -376,10 +370,15 @@ export default function NegociacionesAdmin() {
             <label>% Sindicalizado</label>
             <input
               className="input"
-              type="number" min="0" max="100" step="0.01"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
               placeholder="% Sindicalizado"
               value={form.porcentaje_sindicalizado}
-              onChange={(e) => setForm({ ...form, porcentaje_sindicalizado: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, porcentaje_sindicalizado: e.target.value })
+              }
             />
           </div>
         </div>
@@ -389,7 +388,9 @@ export default function NegociacionesAdmin() {
           <button type="submit" style={{ background: "blue", color: "#fff" }} disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
           </button>
-          <button type="button" onClick={limpiar} disabled={cargando}>Limpiar</button>
+          <button type="button" onClick={limpiar} disabled={cargando}>
+            Limpiar
+          </button>
         </div>
       </form>
 
@@ -450,14 +451,20 @@ export default function NegociacionesAdmin() {
             ))}
             {filas.length === 0 && (
               <tr>
-                <td className="sin-datos" colSpan={9}>Sin resultados</td>
+                <td className="sin-datos" colSpan={9}>
+                  Sin resultados
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {cargando && <small className="nota" style={{ display: "block", marginTop: 8 }}>Procesando…</small>}
+      {cargando && (
+        <small className="nota" style={{ display: "block", marginTop: 8 }}>
+          Procesando…
+        </small>
+      )}
     </div>
   );
 }

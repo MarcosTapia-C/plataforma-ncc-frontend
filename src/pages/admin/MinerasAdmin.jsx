@@ -1,35 +1,6 @@
 // src/pages/admin/MinerasAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Cliente axios con token.
- *  - Maneja 401: limpia sesión y redirige.
- *  - Reenvía otros errores para que cada acción los maneje (409, 400, etc.).
- */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  const instance = axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-
-  instance.interceptors.response.use(
-    (r) => r,
-    (err) => {
-      const st = err?.response?.status;
-      if (st === 401) {
-        alert("Tu sesión expiró. Vuelve a iniciar sesión.");
-        localStorage.removeItem("token_ncc");
-        localStorage.removeItem("usuario_ncc");
-        window.location.href = "/";
-        return Promise.resolve();
-      }
-      return Promise.reject(err);
-    }
-  );
-
-  return instance;
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 export default function MinerasAdmin() {
   const [mineras, setMineras] = useState([]);
@@ -41,7 +12,7 @@ export default function MinerasAdmin() {
   const cargar = async () => {
     setCargando(true);
     try {
-      const r = await api().get("/mineras"); // { ok:true, data:[...] }
+      const r = await api.get("/mineras"); // { ok:true, data:[...] }
       setMineras(r?.data?.data || []);
     } catch (err) {
       const msg =
@@ -72,9 +43,9 @@ export default function MinerasAdmin() {
     setCargando(true);
     try {
       if (editId) {
-        await api().put(`/mineras/${editId}`, { nombre_minera: nombre.trim() });
+        await api.put(`/mineras/${editId}`, { nombre_minera: nombre.trim() });
       } else {
-        await api().post("/mineras", { nombre_minera: nombre.trim() });
+        await api.post("/mineras", { nombre_minera: nombre.trim() });
       }
       await cargar();
       limpiar();
@@ -100,7 +71,7 @@ export default function MinerasAdmin() {
     if (!window.confirm("¿Eliminar esta minera?")) return;
     setCargando(true);
     try {
-      await api().delete(`/mineras/${id}`);
+      await api.delete(`/mineras/${id}`);
       await cargar();
       if (editId === id) limpiar();
     } catch (err) {

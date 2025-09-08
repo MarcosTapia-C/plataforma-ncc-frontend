@@ -1,37 +1,6 @@
 // src/pages/admin/InformesAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Cliente axios con token + manejo 401 */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  const instance = axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  instance.interceptors.response.use(
-    (r) => r,
-    (err) => {
-      const status = err?.response?.status;
-      const data = err?.response?.data;
-      if (status === 401) {
-        alert("Tu sesión expiró. Vuelve a iniciar sesión.");
-        localStorage.removeItem("token_ncc");
-        localStorage.removeItem("usuario_ncc");
-        window.location.href = "/";
-      } else {
-        const msg =
-          data?.mensaje ||
-          (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-          data?.error ||
-          "Error de API.";
-        alert(msg);
-      }
-      return Promise.reject(err);
-    }
-  );
-  return instance;
-}
+import api from "../../services/api"; // <-- cliente común con baseURL `${API_URL}/api`
 
 /** Adapta distintos formatos del backend a un formato plano uniforme */
 function normalizarNeg(n) {
@@ -90,14 +59,14 @@ export default function Informes() {
     (async () => {
       try {
         setCargando(true);
-        const rMin = await api().get("/mineras");
+        const rMin = await api.get("/mineras");
         setMineras(rMin.data?.data || []);
 
-        const rNeg = await api().get("/negociaciones");
-        const arr = Array.isArray(rNeg.data)
-          ? rNeg.data
-          : rNeg.data?.data || [];
+        const rNeg = await api.get("/negociaciones");
+        const arr = Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data || [];
         setNegociaciones(arr.map(normalizarNeg));
+      } catch (e) {
+        alert("No fue posible cargar datos para Informes.");
       } finally {
         setCargando(false);
       }
@@ -337,7 +306,3 @@ export default function Informes() {
     </div>
   );
 }
-
-
-
-

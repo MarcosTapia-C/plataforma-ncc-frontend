@@ -1,30 +1,6 @@
 // src/pages/Admin/MonitoreoAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-/** Cliente axios con token + manejo básico de 401 */
-function api() {
-  const token = localStorage.getItem("token_ncc");
-  const instance = axios.create({
-    baseURL: "http://localhost:3000/api",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  instance.interceptors.response.use(
-    (r) => r,
-    (err) => {
-      const st = err?.response?.status;
-      if (st === 401) {
-        alert("Sesión expirada. Vuelve a iniciar sesión.");
-        localStorage.removeItem("token_ncc");
-        localStorage.removeItem("usuario_ncc");
-        window.location.href = "/";
-        return;
-      }
-      return Promise.reject(err);
-    }
-  );
-  return instance;
-}
+import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 export default function MonitoreoAdmin() {
   const [negociaciones, setNegociaciones] = useState([]);
@@ -46,10 +22,10 @@ export default function MonitoreoAdmin() {
     setCargando(true);
     try {
       const [rNeg, rMon] = await Promise.all([
-        api().get("/negociaciones"),
-        api().get("/monitoreos"),
+        api.get("/negociaciones"),
+        api.get("/monitoreos"),
       ]);
-      const arrNeg = Array.isArray(rNeg.data) ? rNeg.data : (rNeg.data?.data || []);
+      const arrNeg = Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data || [];
       const arrMon = rMon.data?.data || [];
       setNegociaciones(arrNeg);
       setItems(arrMon);
@@ -65,7 +41,10 @@ export default function MonitoreoAdmin() {
     return negociaciones.map((n) => {
       const id = n.id_negociacion ?? n.id;
       const minera =
-        n?.Minera?.nombre_minera || n?.Empresa?.Minera?.nombre_minera || n.minera || "";
+        n?.Minera?.nombre_minera ||
+        n?.Empresa?.Minera?.nombre_minera ||
+        n.minera ||
+        "";
       const empresa = n?.Empresa?.nombre_empresa || n.empresa || "";
       const contrato = n.contrato || n.num_contrato || "";
       return { id, label: [minera, empresa, contrato].filter(Boolean).join(" — ") };
@@ -91,13 +70,15 @@ export default function MonitoreoAdmin() {
         const payload = {
           id_negociacion: Number(idNeg),
           comentarios: coment,
-          ...(fecha === "" ? { fecha_inicio_monitoreo: "" } : { fecha_inicio_monitoreo: fecha }),
+          ...(fecha === ""
+            ? { fecha_inicio_monitoreo: "" }
+            : { fecha_inicio_monitoreo: fecha }),
         };
-        await api().put(`/monitoreos/${editId}`, payload);
+        await api.put(`/monitoreos/${editId}`, payload);
       } else {
         const payload = { id_negociacion: Number(idNeg), comentarios: coment };
         if (fecha) payload.fecha_inicio_monitoreo = fecha;
-        await api().post("/monitoreos", payload);
+        await api.post("/monitoreos", payload);
       }
       await cargarTodo();
       limpiar();
@@ -126,7 +107,7 @@ export default function MonitoreoAdmin() {
     if (!window.confirm("¿Eliminar este monitoreo?")) return;
     setCargando(true);
     try {
-      await api().delete(`/monitoreos/${row.id_monitoreo}`);
+      await api.delete(`/monitoreos/${row.id_monitoreo}`);
       await cargarTodo();
       if (editId === row.id_monitoreo) limpiar();
     } catch (err) {
@@ -183,13 +164,12 @@ export default function MonitoreoAdmin() {
         <div style={{ display: "flex", gap: "10px" }}>
           <div className="grupo" style={{ flex: 1 }}>
             <label>Negociación</label>
-            <select
-              value={idNeg}
-              onChange={(e) => setIdNeg(e.target.value)}
-            >
+            <select value={idNeg} onChange={(e) => setIdNeg(e.target.value)}>
               <option value="">Seleccionar Negociación</option>
               {opcionesNeg.map((o) => (
-                <option key={o.id} value={o.id}>{o.label}</option>
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
               ))}
             </select>
           </div>
@@ -283,7 +263,9 @@ export default function MonitoreoAdmin() {
             })}
             {filtrados.length === 0 && (
               <tr>
-                <td className="sin-datos" colSpan={4}>Sin resultados</td>
+                <td className="sin-datos" colSpan={4}>
+                  Sin resultados
+                </td>
               </tr>
             )}
           </tbody>

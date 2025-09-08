@@ -1,4 +1,5 @@
 // src/services/config.js
-export const API_URL =
-  (import.meta.env && import.meta.env.VITE_API_BASE) || "http://localhost:3000";
+// Solo para Create React App (CRA)
+export const API_URL = process.env.REACT_APP_API_BASE || "http://localhost:3000";
+
 

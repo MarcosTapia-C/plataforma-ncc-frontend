@@ -1,45 +1,15 @@
 // src/pages/Panel.jsx
-import React, { useState } from "react";
+import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
 export default function Panel({ usuario, onSalir }) {
   const navigate = useNavigate();
   const esAdmin = usuario?.id_rol === 1;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
-
-  const handleNavigation = (path) => {
-    navigate(path);
-    closeSidebar(); // Cerrar sidebar después de navegar en móvil
-  };
-
+  
   return (
     <div className="layout">
-      {/* Barra superior móvil */}
-      <div className="topbar">
-        <button className="menu-toggle" onClick={toggleSidebar} aria-label="Abrir menú">
-          ☰
-        </button>
-        <div style={{ fontWeight: 600, fontSize: "16px" }}>
-          Plataforma NCC
-        </div>
-      </div>
-
-      {/* Overlay para cerrar sidebar en móvil */}
-      <div 
-        className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
       {/* Menú lateral */}
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+      <aside className="sidebar">
         {/* Bloque superior */}
         <div
           className="sb-top bg-top borde"
@@ -73,7 +43,7 @@ export default function Panel({ usuario, onSalir }) {
         
         {/* Menú lateral */}
         <nav className="sb-menu">
-          <button type="button" className="sb-item" onClick={() => handleNavigation("/panel")}>
+          <button type="button" className="sb-item" onClick={() => navigate("/panel")}>
             🏠 Inicio
           </button>
           {esAdmin && (
@@ -81,42 +51,42 @@ export default function Panel({ usuario, onSalir }) {
               <button
                 type="button"
                 className="sb-item"
-                onClick={() => handleNavigation("/panel/usuarios")}
+                onClick={() => navigate("/panel/usuarios")}
               >
                 👥 Usuarios
               </button>
               <button
                 type="button"
                 className="sb-item"
-                onClick={() => handleNavigation("/panel/empresas")}
+                onClick={() => navigate("/panel/empresas")}
               >
                 🏢 Empresas
               </button>
               <button
                 type="button"
                 className="sb-item"
-                onClick={() => handleNavigation("/panel/sindicatos")}
+                onClick={() => navigate("/panel/sindicatos")}
               >
                 ✊ Sindicatos
               </button>
               <button
                 type="button"
                 className="sb-item"
-                onClick={() => handleNavigation("/panel/mineras")}
+                onClick={() => navigate("/panel/mineras")}
               >
                 ⛏️ Mineras
               </button>
               <button
                 type="button"
                 className="sb-item"
-                onClick={() => handleNavigation("/panel/negociaciones")}
+                onClick={() => navigate("/panel/negociaciones")}
               >
                 🤝 Negociaciones
               </button>
               <button
                 type="button"
                 className="sb-item"
-                onClick={() => handleNavigation("/panel/monitoreo")}
+                onClick={() => navigate("/panel/monitoreo")}
               >
                 👁️ Monitoreo
               </button>
@@ -125,14 +95,14 @@ export default function Panel({ usuario, onSalir }) {
           <button
             type="button"
             className="sb-item"
-            onClick={() => handleNavigation("/panel/lista")}
+            onClick={() => navigate("/panel/lista")}
           >
             🗂️ Lista
           </button>
           <button
             type="button"
             className="sb-item"
-            onClick={() => handleNavigation("/panel/informes")}
+            onClick={() => navigate("/panel/informes")}
           >
             📊 Reportes
           </button>
@@ -141,7 +111,7 @@ export default function Panel({ usuario, onSalir }) {
           ↩️ Cerrar sesión
         </button>
       </aside>
-
+      
       {/* Contenido principal */}
       <main className="contenido">
         <Outlet />
@@ -149,3 +119,4 @@ export default function Panel({ usuario, onSalir }) {
     </div>
   );
 }
+

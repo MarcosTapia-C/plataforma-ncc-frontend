@@ -1,6 +1,5 @@
-// src/pages/admin/MonitoreoAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api"; // cliente único con baseURL `${API_URL}/api`
 
 export default function MonitoreoAdmin() {
   const [negociaciones, setNegociaciones] = useState([]);
@@ -13,12 +12,9 @@ export default function MonitoreoAdmin() {
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(false);
 
-  // buscador
   const [filtro, setFiltro] = useState("");
 
-  useEffect(() => {
-    cargarTodo();
-  }, []);
+  useEffect(() => { cargarTodo(); }, []);
 
   async function cargarTodo() {
     setCargando(true);
@@ -31,27 +27,23 @@ export default function MonitoreoAdmin() {
       const arrMon = rMon.data?.data || [];
       setNegociaciones(arrNeg);
       setItems(arrMon);
-    } catch (err) {
-      console.error("Error cargando Monitoreo:", err);
-      alert("No fue posible cargar negociaciones/monitoreos.");
     } finally {
       setCargando(false);
     }
   }
 
-  const opcionesNeg = useMemo(() => {
-    return negociaciones.map((n) => {
+  const opcionesNeg = useMemo(() =>
+    negociaciones.map((n) => {
       const id = n.id_negociacion ?? n.id;
       const minera =
         n?.Minera?.nombre_minera ||
         n?.Empresa?.Minera?.nombre_minera ||
-        n.minera ||
-        "";
+        n.minera || "";
       const empresa = n?.Empresa?.nombre_empresa || n.empresa || "";
       const contrato = n.contrato || n.num_contrato || "";
       return { id, label: [minera, empresa, contrato].filter(Boolean).join(" — ") };
-    });
-  }, [negociaciones]);
+    }),
+  [negociaciones]);
 
   function limpiar() {
     setEditId(null);
@@ -69,14 +61,11 @@ export default function MonitoreoAdmin() {
     setCargando(true);
     try {
       if (editId) {
-        const payload = {
+        await api.put(`/monitoreos/${editId}`, {
           id_negociacion: Number(idNeg),
           comentarios: coment,
-          ...(fecha === ""
-            ? { fecha_inicio_monitoreo: "" }
-            : { fecha_inicio_monitoreo: fecha }),
-        };
-        await api.put(`/monitoreos/${editId}`, payload);
+          fecha_inicio_monitoreo: fecha || "",
+        });
       } else {
         const payload = { id_negociacion: Number(idNeg), comentarios: coment };
         if (fecha) payload.fecha_inicio_monitoreo = fecha;
@@ -84,15 +73,6 @@ export default function MonitoreoAdmin() {
       }
       await cargarTodo();
       limpiar();
-    } catch (err) {
-      const data = err?.response?.data;
-      const msg =
-        data?.mensaje ||
-        (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-        data?.error ||
-        "Error de API al guardar.";
-      alert(msg);
-      console.error("Error guardando monitoreo:", err);
     } finally {
       setCargando(false);
     }
@@ -112,23 +92,6 @@ export default function MonitoreoAdmin() {
       await api.delete(`/monitoreos/${row.id_monitoreo}`);
       await cargarTodo();
       if (editId === row.id_monitoreo) limpiar();
-    } catch (err) {
-      const st = err?.response?.status;
-      const data = err?.response?.data;
-      if (st === 409) {
-        alert(
-          data?.mensaje ||
-            "No se puede eliminar: existen registros dependientes asociados."
-        );
-      } else {
-        const msg =
-          data?.mensaje ||
-          (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-          data?.error ||
-          "Error de API al eliminar.";
-        alert(msg);
-      }
-      console.warn("DELETE /monitoreos/:id falló →", st, data || err);
     } finally {
       setCargando(false);
     }
@@ -139,74 +102,49 @@ export default function MonitoreoAdmin() {
     if (!q) return items;
     return items.filter((it) => {
       const neg = opcionesNeg.find((n) => n.id === it.id_negociacion);
-      return [it.id_monitoreo, it.comentarios, it.fecha_inicio_monitoreo, neg?.label]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(q);
+      return [it.comentarios, it.fecha_inicio_monitoreo, neg?.label]
+        .filter(Boolean).join(" ").toLowerCase().includes(q);
     });
   }, [items, filtro, opcionesNeg]);
 
-  // ===== UI =====
+  // ----- UI -----
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>👁️ Registro de Monitoreo</h2>
 
-      {/* FORMULARIO */}
-      <form onSubmit={guardar} className="formulario" style={{ marginBottom: 12 }}>
-        {/* Fila 1: Negociación / Acciones */}
+      {/* <<< aquí agregamos form--sm >>> */}
+      <form onSubmit={guardar} className="formulario form--sm" style={{ marginBottom: 12 }}>
         <div className="grid-form-2">
           <div className="grupo">
             <label>Negociación</label>
-            <select
-              className="input"
-              value={idNeg}
-              onChange={(e) => setIdNeg(e.target.value)}
-            >
+            <select className="input" value={idNeg} onChange={(e) => setIdNeg(e.target.value)}>
               <option value="">Seleccionar Negociación</option>
               {opcionesNeg.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
+                <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </div>
 
           <div className="acciones-centro">
-            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
+            <button type="submit" className="btn btn-primario" disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={limpiar}
-              disabled={cargando}
-            >
+            <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
               Cancelar
             </button>
           </div>
         </div>
 
-        {/* Fila 2: Fecha y Comentarios */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Fecha inicio monitoreo</label>
-            <input
-              className="input"
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-            />
-            <small className="nota">
-              Si dejas vacío: se usa la <b>fecha de inicio</b> de la negociación.
-            </small>
+            <input className="input" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
           </div>
-
           <div className="grupo" style={{ gridColumn: "1 / -1" }}>
             <label>Comentarios</label>
             <textarea
               className="input"
-              rows={4}
+              rows={3}
               value={coment}
               onChange={(e) => setComent(e.target.value)}
               placeholder="Comentarios sobre la negociación"
@@ -215,7 +153,6 @@ export default function MonitoreoAdmin() {
         </div>
       </form>
 
-      {/* CABECERA / BUSCADOR */}
       <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 280 }}>
@@ -229,16 +166,12 @@ export default function MonitoreoAdmin() {
         </div>
       </div>
 
-      {/* TABLA */}
       <div className="tabla-contenedor">
-        <table
-          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
-          style={{ width: "100%" }}
-        >
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
               <th>Negociación</th>
-              <th>Fecha inicio monitoreo</th>
+              <th>Fecha inicio</th>
               <th className="hide-md">Comentarios</th>
               <th style={{ width: 170 }}>Acciones</th>
             </tr>
@@ -250,46 +183,20 @@ export default function MonitoreoAdmin() {
                 <tr key={row.id_monitoreo}>
                   <td className="td-wrap">{neg?.label || row.id_negociacion}</td>
                   <td>{row.fecha_inicio_monitoreo || "-"}</td>
-                  <td className="hide-md td-wrap col-obs">{row.comentarios || "-"}</td>
+                  <td className="hide-md td-wrap">{row.comentarios || "-"}</td>
                   <td className="col-acciones">
-                    <button
-                      className="btn btn-mini"
-                      onClick={() => editar(row)}
-                      disabled={cargando}
-                      aria-label="Editar monitoreo"
-                      title="Editar"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="btn btn-mini btn-peligro"
-                      onClick={() => eliminar(row)}
-                      disabled={cargando}
-                      aria-label="Eliminar monitoreo"
-                      title="Eliminar"
-                    >
-                      Eliminar
-                    </button>
+                    <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>Editar</button>
+                    <button className="btn btn-mini btn-peligro" onClick={() => eliminar(row)} disabled={cargando}>Eliminar</button>
                   </td>
                 </tr>
               );
             })}
             {filtrados.length === 0 && (
-              <tr>
-                <td className="sin-datos" colSpan={4}>
-                  Sin resultados
-                </td>
-              </tr>
+              <tr><td className="sin-datos" colSpan={4}>Sin resultados</td></tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {cargando && (
-        <small className="nota" style={{ display: "block", marginTop: 8 }}>
-          Procesando…
-        </small>
-      )}
     </div>
   );
 }

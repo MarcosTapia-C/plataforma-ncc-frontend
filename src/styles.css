@@ -284,3 +284,10 @@ html, body { overflow-x: hidden; }
 @media (max-width: 480px) {
   .td-num, .td-wrap { word-break: break-all; }
 }
+/* Forzar tamaño chico en formularios que lleven .form--sm */
+.form--sm .btn {
+  padding: 6px 10px !important;
+  font-size: .9rem !important;
+  border-radius: 6px !important;
+  line-height: 1.15 !important;
+}

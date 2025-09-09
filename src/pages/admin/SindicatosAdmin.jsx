@@ -1,6 +1,5 @@
-// src/pages/admin/SindicatosAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api"; // cliente único con baseURL `${API_URL}/api`
 
 const TIPOS = ["Nacional", "Faena", "Interempresa"];
 
@@ -16,19 +15,17 @@ export default function SindicatosAdmin() {
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({});
 
-  // ----- Carga inicial -----
+  // ----- Cargar -----
   const cargar = async () => {
     setCargando(true);
     try {
-      const r = await api.get("/sindicatos"); // { ok:true, data:[...] }
+      const r = await api.get("/sindicatos");
       setSindicatos(r.data?.data || []);
     } finally {
       setCargando(false);
     }
   };
-  useEffect(() => {
-    cargar();
-  }, []);
+  useEffect(() => { cargar(); }, []);
 
   // ----- Helpers -----
   const limpiar = () => {
@@ -61,13 +58,11 @@ export default function SindicatosAdmin() {
   const onGuardar = async (e) => {
     e.preventDefault();
     if (!validar()) return;
-
     const payload = {
       nombre_sindicato: form.nombre_sindicato.trim(),
       federacion: form.federacion.trim() || null,
       tipo_sindicato: form.tipo_sindicato || null,
     };
-
     try {
       setCargando(true);
       if (editId) {
@@ -109,9 +104,8 @@ export default function SindicatosAdmin() {
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
-      {/* FORMULARIO (responsive con grid) */}
-      <form onSubmit={onGuardar} className="formulario" style={{ marginBottom: 12 }}>
-        {/* Fila 1: Nombre / Federación */}
+      {/* <<< aquí agregamos form--sm >>> */}
+      <form onSubmit={onGuardar} className="formulario form--sm" style={{ marginBottom: 12 }}>
         <div className="grid-form-2">
           <div className="grupo">
             <label>Nombre del sindicato</label>
@@ -133,7 +127,6 @@ export default function SindicatosAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Tipo / Acciones */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Tipo de sindicato</label>
@@ -144,27 +137,16 @@ export default function SindicatosAdmin() {
             >
               <option value="">(sin especificar)</option>
               {TIPOS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
           </div>
 
           <div className="acciones-centro">
-            <button
-              type="submit"
-              className="btn btn-primario btn-sm"
-              disabled={cargando}
-            >
+            <button type="submit" className="btn btn-primario" disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={limpiar}
-              disabled={cargando}
-            >
+            <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
               Limpiar
             </button>
           </div>
@@ -177,7 +159,7 @@ export default function SindicatosAdmin() {
         )}
       </form>
 
-      {/* LISTADO + BUSCADOR */}
+      {/* LISTADO */}
       <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
@@ -191,12 +173,8 @@ export default function SindicatosAdmin() {
         </div>
       </div>
 
-      {/* TABLA */}
       <div className="tabla-contenedor">
-        <table
-          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
-          style={{ width: "100%" }}
-        >
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
               <th>Nombre</th>
@@ -212,22 +190,10 @@ export default function SindicatosAdmin() {
                 <td className="hide-md td-wrap">{s.federacion || "-"}</td>
                 <td className="hide-xs td-wrap">{s.tipo_sindicato || "-"}</td>
                 <td className="col-acciones">
-                  <button
-                    className="btn btn-mini"
-                    onClick={() => onEditar(s)}
-                    disabled={cargando}
-                    aria-label="Editar sindicato"
-                    title="Editar"
-                  >
+                  <button className="btn btn-mini" onClick={() => onEditar(s)} disabled={cargando}>
                     Editar
                   </button>
-                  <button
-                    className="btn btn-mini btn-peligro"
-                    onClick={() => onEliminar(s)}
-                    disabled={cargando}
-                    aria-label="Eliminar sindicato"
-                    title="Eliminar"
-                  >
+                  <button className="btn btn-mini btn-peligro" onClick={() => onEliminar(s)} disabled={cargando}>
                     Eliminar
                   </button>
                 </td>
@@ -235,20 +201,13 @@ export default function SindicatosAdmin() {
             ))}
             {sindicatosFiltrados.length === 0 && (
               <tr>
-                <td className="sin-datos" colSpan={4}>
-                  Sin resultados
-                </td>
+                <td className="sin-datos" colSpan={4}>Sin resultados</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {cargando && (
-        <small className="nota" style={{ display: "block", marginTop: 8 }}>
-          Procesando…
-        </small>
-      )}
+      {cargando && <small className="nota">Procesando…</small>}
     </div>
   );
 }

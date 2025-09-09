@@ -1,9 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
-// 🔹 estilo forzado para botón chico
-const BTN_SM = { padding: "6px 10px", fontSize: ".9rem", borderRadius: "6px", lineHeight: 1.15 };
-
 export default function MonitoreoAdmin() {
   const [negociaciones, setNegociaciones] = useState([]);
   const [items, setItems] = useState([]);
@@ -153,18 +150,27 @@ export default function MonitoreoAdmin() {
           <div className="grupo">
             <label>Negociación</label>
             <select className="input" value={idNeg} onChange={(e) => setIdNeg(e.target.value)}>
-              <option value="">Seleccionar Negociación</option>
+              <option value="">Seleccionar negociación</option>
               {opcionesNeg.map((o) => (
                 <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </div>
 
-          <div className="acciones-centro">
-            <button type="submit" className="btn btn-primario" style={BTN_SM} disabled={cargando}>
+          <div className="acciones-centro" style={{ alignItems: "end" }}>
+            <button
+              type="submit"
+              className="btn btn-primario"
+              disabled={cargando}
+            >
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button type="button" className="btn" style={BTN_SM} onClick={limpiar} disabled={cargando}>
+            <button
+              type="button"
+              className="btn"
+              onClick={limpiar}
+              disabled={cargando}
+            >
               Cancelar
             </button>
           </div>
@@ -173,7 +179,7 @@ export default function MonitoreoAdmin() {
         {/* Fila 2: Fecha + Comentarios */}
         <div className="grid-form-2">
           <div className="grupo">
-            <label>Fecha inicio monitoreo</label>
+            <label>Fecha de inicio del monitoreo</label>
             <input
               className="input"
               type="date"

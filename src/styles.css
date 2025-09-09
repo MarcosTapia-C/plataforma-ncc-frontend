@@ -239,3 +239,32 @@ body {
 @media (min-width: 769px) {
   .topbar { display: none !important; }
 }
+
+/* ===== HOTFIX overflow horizontal (evita scroll de la página) ===== */
+html, body { overflow-x: hidden; }
+
+/* La tabla hace scroll adentro de la tarjeta, no la página */
+.tarjeta { overflow: hidden; }
+
+/* Contenedor de tabla bien acotado */
+.tabla-contenedor {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Columna sticky: usar borde en vez de box-shadow para no “empujar” el ancho */
+.tabla--sticky-first thead th:first-child,
+.tabla--sticky-first tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--menu);
+  box-shadow: none;                /* <- quitamos sombra que puede generar overflow */
+  border-right: 1px solid var(--borde); /* <- separador visual sin sumar ancho “fantasma” */
+}
+
+/* En pantallas muy angostas, permitir cortes agresivos si hay textos largos/IDs */
+@media (max-width: 480px) {
+  .td-num, .td-wrap { word-break: break-all; }
+}

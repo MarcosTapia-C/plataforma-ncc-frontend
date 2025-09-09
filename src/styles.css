@@ -156,7 +156,7 @@ body {
    Tablas
    ========================= */
 .tabla-responsive { overflow: auto; }
-.tabla-contenedor { width: 100%; overflow-x: auto; }
+.tabla-contenedor { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 .tabla {
   width: 100%;
@@ -177,7 +177,12 @@ body {
 
 /* Mejoras nuevas para tablas */
 .tabla--compacta th, .tabla--compacta td { padding: 8px 10px; }
-.tabla--ancha { min-width: 920px; } /* ayuda a scroll horizontal cuando corresponde */
+
+/* 👇 Mantener ancho mínimo SOLO en móvil/tablet; quitarlo en desktop para evitar scroll horizontal */
+.tabla--ancha { min-width: 760px; }
+@media (min-width: 992px) {
+  .tabla--ancha { min-width: 0; }
+}
 
 /* Primera columna sticky (útil en móvil) */
 .tabla--sticky-first thead th:first-child,

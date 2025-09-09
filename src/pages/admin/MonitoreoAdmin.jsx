@@ -246,7 +246,7 @@ export default function MonitoreoAdmin() {
               <th>Negociación</th>
               <th>Fecha inicio monitoreo</th>
               <th className="hide-md">Comentarios</th>
-              <th style={{ width: 170 }}>Acciones</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>

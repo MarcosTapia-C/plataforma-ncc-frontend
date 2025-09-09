@@ -1,6 +1,5 @@
-// src/pages/admin/UsuariosAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 export default function UsuariosAdmin() {
   const [roles, setRoles] = useState([]);
@@ -27,7 +26,7 @@ export default function UsuariosAdmin() {
         setRoles(rRoles.data?.data || []);
         const rUsers = await api.get("/usuarios");
         setUsuarios(Array.isArray(rUsers.data) ? rUsers.data : []);
-      } catch (e) {
+      } catch {
         alert("No fue posible cargar Usuarios/Roles.");
       } finally {
         setCargando(false);
@@ -61,9 +60,7 @@ export default function UsuariosAdmin() {
     const q = filtro.trim().toLowerCase();
     if (!q) return usuarios;
     return usuarios.filter((u) =>
-      [u.nombre, u.apellido, u.email, u.usuario]
-        .filter(Boolean)
-        .some((t) => t.toLowerCase().includes(q))
+      [u.nombre, u.apellido, u.email, u.usuario].filter(Boolean).some((t) => t.toLowerCase().includes(q))
     );
   }, [usuarios, filtro]);
 
@@ -139,53 +136,29 @@ export default function UsuariosAdmin() {
         <div className="grid-form-2">
           <div className="grupo">
             <label>Nombre</label>
-            <input
-              className="input"
-              value={form.nombre}
-              placeholder="Nombre"
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            />
+            <input className="input" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
           </div>
           <div className="grupo">
             <label>Apellido</label>
-            <input
-              className="input"
-              value={form.apellido}
-              placeholder="Apellido"
-              onChange={(e) => setForm({ ...form, apellido: e.target.value })}
-            />
+            <input className="input" value={form.apellido} onChange={(e) => setForm({ ...form, apellido: e.target.value })} />
           </div>
         </div>
 
         <div className="grid-form-2">
           <div className="grupo">
             <label>Email</label>
-            <input
-              className="input"
-              value={form.email}
-              placeholder="correo@dominio.cl"
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
+            <input className="input" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           </div>
           <div className="grupo">
             <label>Usuario</label>
-            <input
-              className="input"
-              value={form.usuario}
-              placeholder="usuario"
-              onChange={(e) => setForm({ ...form, usuario: e.target.value })}
-            />
+            <input className="input" value={form.usuario} onChange={(e) => setForm({ ...form, usuario: e.target.value })} />
           </div>
         </div>
 
         <div className="grid-form-2">
           <div className="grupo">
             <label>Rol</label>
-            <select
-              className="input"
-              value={form.id_rol}
-              onChange={(e) => setForm({ ...form, id_rol: Number(e.target.value) })}
-            >
+            <select className="input" value={form.id_rol} onChange={(e) => setForm({ ...form, id_rol: Number(e.target.value) })}>
               {roles.map((r) => (
                 <option key={r.id_rol} value={r.id_rol}>
                   {r.nombre_rol}
@@ -199,7 +172,6 @@ export default function UsuariosAdmin() {
               <input
                 className="input"
                 type="password"
-                placeholder="••••••"
                 value={form.contrasena}
                 onChange={(e) => setForm({ ...form, contrasena: e.target.value })}
               />
@@ -215,12 +187,6 @@ export default function UsuariosAdmin() {
             Limpiar
           </button>
         </div>
-
-        {Object.keys(errores).length > 0 && (
-          <small className="nota" style={{ color: "#b91c1c" }}>
-            Revisa los campos: {Object.keys(errores).join(", ")}.
-          </small>
-        )}
       </form>
 
       {/* LISTADO */}
@@ -228,12 +194,7 @@ export default function UsuariosAdmin() {
         <h3 className="titulo-seccion">Datos guardados</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
           <label>Buscar</label>
-          <input
-            className="input"
-            placeholder="Por nombre, usuario o email…"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          />
+          <input className="input" value={filtro} onChange={(e) => setFiltro(e.target.value)} />
         </div>
       </div>
 
@@ -246,26 +207,22 @@ export default function UsuariosAdmin() {
               <th className="hide-xs">Email</th>
               <th className="hide-md">Usuario</th>
               <th>Rol</th>
-              <th style={{ width: 160 }}>Acciones</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {usuariosFiltrados.map((u) => (
               <tr key={u.id_usuario}>
-                <td className="td-wrap">{u.nombre}</td>
-                <td className="td-wrap">{u.apellido}</td>
-                <td className="hide-xs td-wrap">{u.email}</td>
-                <td className="hide-md td-wrap">{u.usuario}</td>
+                <td>{u.nombre}</td>
+                <td>{u.apellido}</td>
+                <td className="hide-xs">{u.email}</td>
+                <td className="hide-md">{u.usuario}</td>
                 <td>{u.Rol?.nombre_rol || rolNombre(u.id_rol)}</td>
                 <td className="col-acciones">
                   <button className="btn btn-mini" onClick={() => onEditar(u)} disabled={cargando}>
                     Editar
                   </button>
-                  <button
-                    className="btn btn-mini btn-peligro"
-                    onClick={() => onEliminar(u.id_usuario)}
-                    disabled={cargando}
-                  >
+                  <button className="btn btn-mini btn-peligro" onClick={() => onEliminar(u.id_usuario)} disabled={cargando}>
                     Eliminar
                   </button>
                 </td>
@@ -281,8 +238,7 @@ export default function UsuariosAdmin() {
           </tbody>
         </table>
       </div>
-
-      {cargando && <small className="nota">Procesando…</small>}
     </div>
   );
 }
+

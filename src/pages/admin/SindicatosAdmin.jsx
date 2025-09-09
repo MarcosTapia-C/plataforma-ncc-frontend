@@ -206,7 +206,7 @@ export default function SindicatosAdmin() {
               <th>Nombre</th>
               <th className="hide-md">Federación</th>
               <th className="hide-xs">Tipo</th>
-              <th style={{ width: 160 }}>Acciones</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>

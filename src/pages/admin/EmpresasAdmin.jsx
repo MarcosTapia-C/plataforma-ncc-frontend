@@ -24,7 +24,7 @@ export default function EmpresasAdmin() {
   const [editando, setEditando] = useState(null);
   const [cargando, setCargando] = useState(false);
 
-  // NUEVO: buscador
+  // Buscador
   const [filtro, setFiltro] = useState("");
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function EmpresasAdmin() {
     }
   }
 
-  // NUEVO: filtrar en memoria (no toca backend)
+  // Filtrado en memoria
   const empresasFiltradas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return empresas;
@@ -242,7 +242,7 @@ export default function EmpresasAdmin() {
         </div>
       </form>
 
-      {/* NUEVO: cabecera con buscador */}
+      {/* Cabecera con buscador */}
       <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
@@ -261,10 +261,10 @@ export default function EmpresasAdmin() {
         <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
-              <th style={{ width: "40%" }}>Nombre de la empresa</th>
-              <th style={{ width: "20%" }} translate="no">RUT</th>
-              <th className="hide-md" style={{ width: "25%" }}>Minera</th>
-              <th style={{ width: "15%" }}>Acciones</th>
+              <th>Nombre de la empresa</th>
+              <th translate="no">RUT</th>
+              <th className="hide-md">Minera</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -272,7 +272,9 @@ export default function EmpresasAdmin() {
               <tr key={e.id_empresa}>
                 <td className="td-wrap">{e.nombre_empresa}</td>
                 <td className="td-num" translate="no">{e.rut_empresa}</td>
-                <td className="hide-md td-wrap">{e.Minera?.nombre_minera || e.id_minera}</td>
+                <td className="hide-md td-wrap">
+                  {e.Minera?.nombre_minera || e.id_minera}
+                </td>
                 <td className="col-acciones">
                   <button
                     className="btn btn-mini"

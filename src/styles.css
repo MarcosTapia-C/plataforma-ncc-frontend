@@ -34,10 +34,21 @@ body {
   border: 1px solid var(--borde);
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0,0,0,.08);
-  padding: 24px;
+  padding: 16px;
+  margin: 16px auto;
 }
+
+/* Responsive padding para tarjetas */
+@media (min-width: 480px) {
+  .tarjeta { padding: 20px; margin: 20px auto; }
+}
+
 @media (min-width: 768px) {
-  .tarjeta { padding: 28px; }
+  .tarjeta { padding: 24px; margin: 24px auto; }
+}
+
+@media (min-width: 1024px) {
+  .tarjeta { padding: 28px; margin: 28px auto; }
 }
 
 .input {
@@ -47,7 +58,15 @@ body {
   border-radius: 6px;
   background: #fff;
   font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
+
+.input:focus {
+  outline: none;
+  border-color: #0006BF;
+  box-shadow: 0 0 0 2px rgba(0, 6, 191, 0.1);
+}
+
 .input::placeholder { color: #A3A3A3; }
 
 /* =========================
@@ -55,7 +74,7 @@ body {
    ========================= */
 .layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 240px 1fr;
   min-height: 100svh;
 }
 
@@ -63,33 +82,69 @@ body {
 .sidebar {
   background: var(--menu);
   border-right: 1px solid var(--borde);
-  display: flex; flex-direction: column;
-  gap: 10px; padding: 12px;
-  position: sticky; top: 0; height: 100svh; z-index: 30;
+  display: flex; 
+  flex-direction: column;
+  gap: 10px; 
+  padding: 12px;
+  position: sticky; 
+  top: 0; 
+  height: 100svh; 
+  z-index: 30;
 }
 
-.sb-top { padding: 10px; border-radius: 8px; }
+.sb-top { 
+  padding: 12px; 
+  border-radius: 8px; 
+  min-height: 64px;
+}
 
-.sb-menu { display: flex; flex-direction: column; gap: 6px; }
+.sb-menu { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px; 
+  flex: 1;
+}
+
 .sb-item {
-  padding: 10px; border-radius: 8px; cursor: pointer; user-select: none;
-  text-align: left; background: transparent; border: none; font: inherit;
+  padding: 12px 16px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  user-select: none;
+  text-align: left; 
+  background: transparent; 
+  border: none; 
+  font: inherit;
+  transition: background-color 0.2s ease;
+  font-size: 0.95rem;
 }
-.sb-item:hover { background: #e7e7e7; }
+
+.sb-item:hover { 
+  background: #e7e7e7; 
+}
 
 .sb-logout {
-  margin-top: auto; padding: 10px;
-  border: 1px solid var(--borde); border-radius: 8px;
-  background: #fff; cursor: pointer;
+  margin-top: auto; 
+  padding: 12px 16px;
+  border: 1px solid var(--borde); 
+  border-radius: 8px;
+  background: #fff; 
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.95rem;
 }
-.sb-logout:hover { background: #f6f6f6; }
+
+.sb-logout:hover { 
+  background: #f6f6f6; 
+}
 
 /* === Contenido principal === */
 .contenido {
   background: var(--fondo);
   display: block;
-  padding: 0 16px; /* respiración lateral */
+  padding: 0 12px;
+  min-width: 0; /* Previene overflow */
 }
+
 .contenido > .contenedor-pagina {
   width: 100%;
   margin-left: auto;
@@ -99,195 +154,538 @@ body {
 /* =========================
    Estructura páginas admin
    ========================= */
-.contenedor-pagina { max-width: 1280px; margin: 24px auto; padding: 0; }
-.contenedor-pagina.ancho-xl { max-width: 1400px; } /* para tablas anchas si lo necesitas */
+.contenedor-pagina { 
+  max-width: 1280px; 
+  margin: 16px auto; 
+  padding: 0;
+}
+
+.contenedor-pagina.ancho-xl { 
+  max-width: 1400px; 
+}
 
 .barra-pagina {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
-.titulo { margin: 0; }
+
+.titulo { 
+  margin: 0; 
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
 
 /* Formularios */
-.formulario .fila-form { display: grid; gap: 12px; } /* (por compatibilidad) */
-@media (min-width: 720px) {
-  .formulario .fila-form { grid-template-columns: repeat(3, 1fr); }
+.formulario {
+  margin-bottom: 20px;
 }
-.grupo label { display: block; font-size: 14px; margin-bottom: 6px; }
+
+.formulario .fila-form { 
+  display: grid; 
+  gap: 12px; 
+}
+
+@media (min-width: 768px) {
+  .formulario .fila-form { 
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+  }
+}
+
+.grupo { 
+  margin-bottom: 12px; 
+}
+
+.grupo label { 
+  display: block; 
+  font-size: 14px; 
+  font-weight: 500;
+  margin-bottom: 6px; 
+  color: var(--texto);
+}
+
 .grupo input, .grupo select, .grupo textarea {
-  width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;
+  width: 100%; 
+  padding: 10px 12px; 
+  border-radius: 6px; 
+  border: 1px solid #cbd5e1; 
+  background: #fff;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 
-/* Grid 2 columnas (forms) */
-.grid-form-2 { display: grid; gap: 12px; }
-@media (min-width: 900px) {
-  .grid-form-2 { grid-template-columns: 1fr 1fr; }
+.grupo input:focus, .grupo select:focus, .grupo textarea:focus {
+  outline: none;
+  border-color: #0006BF;
+  box-shadow: 0 0 0 2px rgba(0, 6, 191, 0.1);
 }
-.grid-form-2 .grupo label { font-weight: 600; }
 
-/* Acciones centradas */
-.acciones-centro { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+/* Grid responsivo mejorado para formularios */
+.grid-form-2 { 
+  display: grid; 
+  gap: 16px; 
+}
+
+/* Tablet: 2 columnas más tempranas */
+@media (min-width: 640px) {
+  .grid-form-2 { 
+    grid-template-columns: 1fr 1fr; 
+    align-items: start;
+  }
+}
+
+/* Desktop: mantener 2 columnas pero con mejor espaciado */
+@media (min-width: 1024px) {
+  .grid-form-2 { 
+    gap: 20px; 
+  }
+}
+
+.grid-form-2 .grupo label { 
+  font-weight: 600; 
+}
+
+/* Acciones centradas con mejor responsive */
+.acciones-centro { 
+  display: flex; 
+  gap: 10px; 
+  justify-content: center; 
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+  .acciones-centro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .acciones-centro .btn {
+    width: 100%;
+  }
+}
 
 /* Secciones */
 .cabecera-seccion {
-  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
-  gap: 8px;
+  display: flex; 
+  align-items: baseline; 
+  justify-content: space-between; 
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.titulo-seccion { margin: 0; }
 
-.nota { color: #64748b; display: block; margin-top: 8px; }
+@media (max-width: 640px) {
+  .cabecera-seccion {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .cabecera-seccion .grupo {
+    max-width: none !important;
+  }
+}
+
+.titulo-seccion { 
+  margin: 0; 
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.nota { 
+  color: #64748b; 
+  display: block; 
+  margin-top: 8px; 
+  font-size: 0.9rem;
+}
 
 /* =========================
-   Botones
+   Botones mejorados
    ========================= */
 .btn {
   border: 1px solid rgba(0,0,0,.2);
   background: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.btn:hover { box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-.btn-primario { background: #0006BF; color: #fff; border-color: #0006BF; }
-.btn-secundario { background: #e2e8f0; }
-.btn-peligro { background: #fee2e2; border-color: #fecaca; }
-.btn-mini { padding: 6px 8px; font-size: 13px; }
-
-/* Utilidades de tamaño para botones (no afectan por defecto) */
-.btn-sm {
-  padding: 6px 10px;
-  font-size: .9rem;
+  padding: 10px 16px;
   border-radius: 6px;
-  line-height: 1.15;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+}
+
+.btn:hover { 
+  box-shadow: 0 2px 8px rgba(0,0,0,.12); 
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primario { 
+  background: #0006BF; 
+  color: #fff; 
+  border-color: #0006BF; 
+}
+
+.btn-primario:hover {
+  background: #0005a8;
+  border-color: #0005a8;
+}
+
+.btn-secundario { 
+  background: #e2e8f0; 
+  border-color: #cbd5e1;
+}
+
+.btn-secundario:hover {
+  background: #cbd5e1;
+}
+
+.btn-peligro { 
+  background: #fee2e2; 
+  border-color: #fecaca; 
+  color: #dc2626;
+}
+
+.btn-peligro:hover {
+  background: #fecaca;
+  border-color: #f87171;
+}
+
+.btn-mini { 
+  padding: 6px 10px; 
+  font-size: 0.85rem; 
+  min-height: 32px;
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  min-height: 36px;
 }
 
 .btn-lg {
-  padding: 10px 16px;
-  font-size: 1rem;
-  border-radius: 10px;
-  line-height: 1.15;
+  padding: 12px 20px;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  min-height: 48px;
 }
 
-
 /* =========================
-   Tablas
+   Tablas responsivas mejoradas
    ========================= */
-.tabla-responsive { overflow: auto; }
-.tabla-contenedor { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tabla-contenedor { 
+  width: 100%; 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: #fff;
+}
 
 .tabla {
   width: 100%;
   border-collapse: collapse;
   table-layout: auto;
+  margin: 0;
 }
+
 .tabla th, .tabla td {
   border-bottom: 1px solid #e2e8f0;
-  padding: 10px 12px;
+  padding: 12px;
   text-align: left;
-  vertical-align: top;
-  white-space: normal;
-}
-.tabla thead th { font-weight: 600; font-size: 14px; }
-.sin-datos { text-align: center; color: #64748b; }
-.col-acciones { display: flex; gap: 6px; flex-wrap: wrap; }
-.col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* Mejoras nuevas para tablas */
-.tabla--compacta th, .tabla--compacta td { padding: 8px 10px; }
-
-/* 👇 Mantener ancho mínimo SOLO en móvil/tablet; quitarlo en desktop para evitar scroll horizontal */
-.tabla--ancha { min-width: 760px; }
-@media (min-width: 992px) {
-  .tabla--ancha { min-width: 0; }
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-/* Primera columna sticky (útil en móvil) */
+/* Responsive padding para celdas */
+@media (max-width: 640px) {
+  .tabla th, .tabla td {
+    padding: 8px 6px;
+    font-size: 0.9rem;
+  }
+}
+
+.tabla thead th { 
+  font-weight: 600; 
+  font-size: 0.9rem; 
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.tabla tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.sin-datos { 
+  text-align: center; 
+  color: #64748b; 
+  font-style: italic;
+  padding: 20px;
+}
+
+.col-acciones { 
+  display: flex; 
+  gap: 6px; 
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .col-acciones {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.col-obs { 
+  max-width: 280px; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+}
+
+@media (max-width: 768px) {
+  .col-obs {
+    max-width: 200px;
+  }
+}
+
+/* Mejoras para tablas */
+.tabla--compacta th, .tabla--compacta td { 
+  padding: 10px 8px; 
+}
+
+@media (max-width: 640px) {
+  .tabla--compacta th, .tabla--compacta td { 
+    padding: 8px 4px; 
+  }
+}
+
+/* Ancho mínimo solo para pantallas pequeñas */
+.tabla--ancha { 
+  min-width: 600px; 
+}
+
+@media (min-width: 768px) {
+  .tabla--ancha { 
+    min-width: 700px; 
+  }
+}
+
+@media (min-width: 1024px) {
+  .tabla--ancha { 
+    min-width: 0; 
+  }
+}
+
+/* Primera columna sticky mejorada */
 .tabla--sticky-first thead th:first-child,
 .tabla--sticky-first tbody td:first-child {
   position: sticky;
   left: 0;
-  z-index: 1;
-  background: var(--menu);
-  box-shadow: 1px 0 0 0 var(--borde);
+  z-index: 3;
+  background: #f8fafc;
+  border-right: 2px solid var(--borde);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
 }
 
-/* Utilidades de celdas */
-.td-wrap { word-break: break-word; overflow-wrap: anywhere; hyphens: auto; }
-.td-num  { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla--sticky-first tbody td:first-child {
+  background: #fff;
+}
+
+.tabla--sticky-first tbody tr:hover td:first-child {
+  background: #f8fafc;
+}
+
+/* Utilidades de celdas mejoradas */
+.td-wrap { 
+  word-break: break-word; 
+  overflow-wrap: anywhere; 
+  hyphens: auto;
+  white-space: normal;
+  max-width: 250px;
+}
+
+.td-num  { 
+  text-align: right; 
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 
 /* =========================
-   Utilidades responsive para ocultar columnas
-   (se aplican en th y td)
+   Utilidades responsive mejoradas
    ========================= */
 @media (max-width: 768px) {
   .hide-md { display: none !important; }
 }
+
+@media (max-width: 640px) {
+  .hide-sm { display: none !important; }
+}
+
 @media (max-width: 480px) {
   .hide-xs { display: none !important; }
 }
 
+/* Mostrar solo en móvil */
+@media (min-width: 769px) {
+  .show-mobile-only { display: none !important; }
+}
+
 /* =========================
-   Ajustes responsive globales
+   Layout responsive mejorado
    ========================= */
-@media (max-width: 900px) {
-  .cabecera-seccion { align-items: center; }
+@media (max-width: 1024px) {
+  .layout { 
+    grid-template-columns: 200px 1fr; 
+  }
+  
+  .sidebar {
+    padding: 10px;
+  }
+  
+  .sb-item, .sb-logout {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 768px) {
-  /* Layout: el contenido ocupa todo, la sidebar pasa a off-canvas */
-  .layout { grid-template-columns: 1fr; }
+  /* Layout móvil: contenido ocupa todo */
+  .layout { 
+    grid-template-columns: 1fr; 
+  }
 
-  /* Off-canvas (usa clases agregadas en Panel.jsx) */
+  /* Off-canvas sidebar */
   .sidebar.sidebar--overlay {
     position: fixed !important;
-    left: 0; top: 0; bottom: 0;
-    width: 260px;
+    left: 0; 
+    top: 0; 
+    bottom: 0;
+    width: 280px;
     transform: translateX(-100%);
-    transition: transform .22s ease;
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
   }
+  
   .sidebar.sidebar--overlay.sidebar--open {
     transform: translateX(0);
   }
 
-  .contenido { padding: 0 8px; }
+  .contenido { 
+    padding: 0 12px; 
+  }
+  
+  .contenedor-pagina {
+    margin: 8px auto;
+  }
 }
 
-/* Topbar solo en móvil (si existe el nodo .topbar) */
-@media (min-width: 769px) {
-  .topbar { display: none !important; }
-}
-
-/* ===== HOTFIX overflow horizontal (evita scroll de la página) ===== */
-html, body { overflow-x: hidden; }
-
-/* La tabla hace scroll adentro de la tarjeta, no la página */
-.tarjeta { overflow: hidden; }
-
-/* Contenedor de tabla bien acotado */
-.tabla-contenedor {
-  max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Columna sticky: usar borde en vez de box-shadow para no “empujar” el ancho */
-.tabla--sticky-first thead th:first-child,
-.tabla--sticky-first tbody td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--menu);
-  box-shadow: none;                /* <- quitamos sombra que puede generar overflow */
-  border-right: 1px solid var(--borde); /* <- separador visual sin sumar ancho “fantasma” */
-}
-
-/* En pantallas muy angostas, permitir cortes agresivos si hay textos largos/IDs */
 @media (max-width: 480px) {
-  .td-num, .td-wrap { word-break: break-all; }
+  .contenido { 
+    padding: 0 8px; 
+  }
+  
+  .sidebar.sidebar--overlay {
+    width: 260px;
+  }
+  
+  .titulo {
+    font-size: 1.3rem;
+  }
 }
-/* Forzar tamaño chico en formularios que lleven .form--sm */
-.form--sm .btn {
-  padding: 6px 10px !important;
-  font-size: .9rem !important;
-  border-radius: 6px !important;
-  line-height: 1.15 !important;
+
+/* Topbar mejorada */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--panel-top);
+  border-bottom: 1px solid var(--borde);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+@media (min-width: 769px) {
+  .topbar { 
+    display: none !important; 
+  }
+}
+
+/* =========================
+   Prevención de overflow
+   ========================= */
+html, body { 
+  overflow-x: hidden; 
+}
+
+.tarjeta { 
+  overflow: hidden; 
+  max-width: 100%;
+}
+
+/* =========================
+   Mejoras de accesibilidad y UX
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible para navegación con teclado */
+.btn:focus-visible,
+.input:focus-visible,
+.sb-item:focus-visible {
+  outline: 2px solid #0006BF;
+  outline-offset: 2px;
+}
+
+/* Mejoras para pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .tarjeta {
+    padding: 12px;
+    margin: 8px auto;
+  }
+  
+  .grid-form-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .tabla th, .tabla td {
+    padding: 6px 4px;
+    font-size: 0.85rem;
+  }
+  
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
 }

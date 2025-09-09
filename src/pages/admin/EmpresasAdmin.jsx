@@ -174,145 +174,205 @@ export default function EmpresasAdmin() {
   }
 
   return (
-    <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
-      <h2>🏢 Empresas Contratistas</h2>
+    <div className="contenedor-pagina">
+      <div className="tarjeta" style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <div className="barra-pagina">
+          <h2 className="titulo">🏢 Empresas Contratistas</h2>
+        </div>
 
-      {/* FORMULARIO */}
-      <form onSubmit={guardar} className="formulario" style={{ marginBottom: 15 }}>
-        {/* Fila: Nombre / RUT */}
-        <div className="grid-form-2">
-          <div className="grupo">
-            <label>Nombre de la empresa</label>
+        {/* FORMULARIO RESPONSIVO */}
+        <form onSubmit={guardar} className="formulario">
+          {/* Fila 1: Nombre / RUT */}
+          <div className="grid-form-2">
+            <div className="grupo">
+              <label htmlFor="nombre-empresa">Nombre de la empresa</label>
+              <input
+                id="nombre-empresa"
+                className="input"
+                placeholder="Ingrese el nombre de la empresa"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                autoComplete="organization"
+              />
+            </div>
+
+            <div className="grupo">
+              <label htmlFor="rut-empresa">RUT Empresa</label>
+              <input
+                id="rut-empresa"
+                className="input"
+                placeholder="12.345.678-9"
+                value={formatearRutDesdeRaw(rutRaw)}
+                onChange={(e) => setRutRaw(limpiarRut(e.target.value))}
+                translate="no"
+                autoComplete="off"
+              />
+            </div>
+          </div>
+
+          {/* Fila 2: Minera / Acciones */}
+          <div className="grid-form-2">
+            <div className="grupo">
+              <label htmlFor="select-minera">Minera</label>
+              <select
+                id="select-minera"
+                className="input"
+                value={idMinera}
+                onChange={(e) => setIdMinera(e.target.value)}
+              >
+                <option value="">Seleccione una minera</option>
+                {mineras.map((m) => (
+                  <option key={m.id_minera} value={m.id_minera}>
+                    {m.nombre_minera}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="acciones-centro">
+              <button
+                type="submit"
+                className="btn btn-primario"
+                disabled={cargando}
+                aria-label={editando ? "Actualizar empresa" : "Agregar empresa"}
+              >
+                {editando ? "Actualizar" : "Agregar"}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={limpiar}
+                disabled={cargando}
+                aria-label="Limpiar formulario"
+              >
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* CABECERA CON BUSCADOR RESPONSIVO */}
+        <div className="cabecera-seccion">
+          <h3 className="titulo-seccion">Listado ({empresasFiltradas.length})</h3>
+          <div className="grupo" style={{ maxWidth: 300 }}>
+            <label htmlFor="filtro-buscar" className="sr-only">Buscar empresas</label>
             <input
+              id="filtro-buscar"
               className="input"
-              placeholder="Nombre de la empresa"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              placeholder="Buscar por empresa, RUT o minera..."
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+              autoComplete="off"
             />
           </div>
-
-          <div className="grupo">
-            <label>RUT Empresa</label>
-            <input
-              className="input"
-              placeholder="RUT Empresa"
-              value={formatearRutDesdeRaw(rutRaw)}
-              onChange={(e) => setRutRaw(limpiarRut(e.target.value))}
-              translate="no"
-            />
-          </div>
         </div>
 
-        {/* Fila: Minera / Acciones */}
-        <div className="grid-form-2">
-          <div className="grupo">
-            <label>Minera</label>
-            <select
-              className="input"
-              value={idMinera}
-              onChange={(e) => setIdMinera(e.target.value)}
-            >
-              <option value="">Seleccione Minera</option>
-              {mineras.map((m) => (
-                <option key={m.id_minera} value={m.id_minera}>
-                  {m.nombre_minera}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="acciones-centro" style={{ alignItems: "end" }}>
-            <button
-              type="submit"
-              onClick={guardar}
-              className="btn btn-primario"
-              disabled={cargando}
-            >
-              {editando ? "Actualizar" : "Agregar"}
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={limpiar}
-              disabled={cargando}
-            >
-              Limpiar
-            </button>
-          </div>
-        </div>
-      </form>
-
-      {/* Cabecera con buscador */}
-      <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
-        <h3 className="titulo-seccion">Listado</h3>
-        <div className="grupo" style={{ maxWidth: 260 }}>
-          <label>Buscar</label>
-          <input
-            className="input"
-            placeholder="Por empresa, RUT o minera…"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* TABLA */}
-      <div className="tabla-contenedor">
-        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
-          <thead>
-            <tr>
-              <th>Nombre de la empresa</th>
-              <th translate="no">RUT</th>
-              <th className="hide-md">Minera</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {empresasFiltradas.map((e) => (
-              <tr key={e.id_empresa}>
-                <td className="td-wrap">{e.nombre_empresa}</td>
-                <td className="td-num" translate="no">{e.rut_empresa}</td>
-                <td className="hide-md td-wrap">
-                  {e.Minera?.nombre_minera || e.id_minera}
-                </td>
-                <td className="col-acciones">
-                  <button
-                    className="btn btn-mini"
-                    onClick={() => editar(e)}
-                    disabled={cargando}
-                    aria-label="Editar empresa"
-                    title="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="btn btn-mini btn-peligro"
-                    onClick={() => eliminar(e.id_empresa)}
-                    disabled={cargando}
-                    aria-label="Eliminar empresa"
-                    title="Eliminar"
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {empresasFiltradas.length === 0 && (
+        {/* TABLA RESPONSIVA */}
+        <div className="tabla-contenedor">
+          <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first">
+            <thead>
               <tr>
-                <td className="sin-datos" colSpan={4}>
-                  Sin datos para mostrar
-                </td>
+                <th>Empresa</th>
+                <th className="td-num">RUT</th>
+                <th className="hide-sm">Minera</th>
+                <th style={{ width: "120px", textAlign: "center" }}>Acciones</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {empresasFiltradas.map((e) => (
+                <tr key={e.id_empresa}>
+                  <td className="td-wrap">
+                    <div style={{ fontWeight: 500 }}>{e.nombre_empresa}</div>
+                    {/* Mostrar minera en móvil cuando la columna está oculta */}
+                    <div className="show-mobile-only" style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "2px" }}>
+                      {e.Minera?.nombre_minera || `ID: ${e.id_minera}`}
+                    </div>
+                  </td>
+                  <td className="td-num" translate="no">
+                    <code style={{ fontSize: "0.9rem", background: "#f1f5f9", padding: "2px 4px", borderRadius: "3px" }}>
+                      {e.rut_empresa}
+                    </code>
+                  </td>
+                  <td className="hide-sm td-wrap">
+                    {e.Minera?.nombre_minera || `ID: ${e.id_minera}`}
+                  </td>
+                  <td className="col-acciones">
+                    <button
+                      className="btn btn-mini"
+                      onClick={() => editar(e)}
+                      disabled={cargando}
+                      aria-label={`Editar empresa ${e.nombre_empresa}`}
+                      title="Editar empresa"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="btn btn-mini btn-peligro"
+                      onClick={() => eliminar(e.id_empresa)}
+                      disabled={cargando}
+                      aria-label={`Eliminar empresa ${e.nombre_empresa}`}
+                      title="Eliminar empresa"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {empresasFiltradas.length === 0 && (
+                <tr>
+                  <td className="sin-datos" colSpan={4}>
+                    {filtro ? "No se encontraron empresas que coincidan con la búsqueda" : "No hay empresas registradas"}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* INDICADOR DE CARGA */}
+        {cargando && (
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            gap: "8px", 
+            marginTop: "16px",
+            padding: "12px",
+            background: "#f8fafc",
+            borderRadius: "6px",
+            border: "1px solid #e2e8f0"
+          }}>
+            <div style={{
+              width: "16px",
+              height: "16px",
+              border: "2px solid #e2e8f0",
+              borderTop: "2px solid #0006BF",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }}></div>
+            <span className="nota">Procesando...</span>
+          </div>
+        )}
       </div>
 
-      {cargando && (
-        <small className="nota" style={{ display: "block", marginTop: 8 }}>
-          Procesando…
-        </small>
-      )}
+      {/* CSS para la animación de carga */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+      `}</style>
     </div>
   );
 }

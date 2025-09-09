@@ -34,21 +34,12 @@ body {
   border: 1px solid var(--borde);
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0,0,0,.08);
-  padding: 16px;
-  margin: 16px auto;
+  padding: 20px;
 }
 
-/* Responsive padding para tarjetas */
-@media (min-width: 480px) {
-  .tarjeta { padding: 20px; margin: 20px auto; }
-}
-
-@media (min-width: 768px) {
-  .tarjeta { padding: 24px; margin: 24px auto; }
-}
-
-@media (min-width: 1024px) {
-  .tarjeta { padding: 28px; margin: 28px auto; }
+/* Padding más pequeño en móviles */
+@media (max-width: 768px) {
+  .tarjeta { padding: 16px; }
 }
 
 .input {
@@ -58,15 +49,7 @@ body {
   border-radius: 6px;
   background: #fff;
   font-size: 1rem;
-  transition: border-color 0.2s ease;
 }
-
-.input:focus {
-  outline: none;
-  border-color: #0006BF;
-  box-shadow: 0 0 0 2px rgba(0, 6, 191, 0.1);
-}
-
 .input::placeholder { color: #A3A3A3; }
 
 /* =========================
@@ -74,7 +57,7 @@ body {
    ========================= */
 .layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 220px 1fr;
   min-height: 100svh;
 }
 
@@ -82,69 +65,33 @@ body {
 .sidebar {
   background: var(--menu);
   border-right: 1px solid var(--borde);
-  display: flex; 
-  flex-direction: column;
-  gap: 10px; 
-  padding: 12px;
-  position: sticky; 
-  top: 0; 
-  height: 100svh; 
-  z-index: 30;
+  display: flex; flex-direction: column;
+  gap: 10px; padding: 12px;
+  position: sticky; top: 0; height: 100svh; z-index: 30;
 }
 
-.sb-top { 
-  padding: 12px; 
-  border-radius: 8px; 
-  min-height: 64px;
-}
+.sb-top { padding: 10px; border-radius: 8px; }
 
-.sb-menu { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 4px; 
-  flex: 1;
-}
-
+.sb-menu { display: flex; flex-direction: column; gap: 6px; }
 .sb-item {
-  padding: 12px 16px; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  user-select: none;
-  text-align: left; 
-  background: transparent; 
-  border: none; 
-  font: inherit;
-  transition: background-color 0.2s ease;
-  font-size: 0.95rem;
+  padding: 10px; border-radius: 8px; cursor: pointer; user-select: none;
+  text-align: left; background: transparent; border: none; font: inherit;
 }
-
-.sb-item:hover { 
-  background: #e7e7e7; 
-}
+.sb-item:hover { background: #e7e7e7; }
 
 .sb-logout {
-  margin-top: auto; 
-  padding: 12px 16px;
-  border: 1px solid var(--borde); 
-  border-radius: 8px;
-  background: #fff; 
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 0.95rem;
+  margin-top: auto; padding: 10px;
+  border: 1px solid var(--borde); border-radius: 8px;
+  background: #fff; cursor: pointer;
 }
-
-.sb-logout:hover { 
-  background: #f6f6f6; 
-}
+.sb-logout:hover { background: #f6f6f6; }
 
 /* === Contenido principal === */
 .contenido {
   background: var(--fondo);
   display: block;
-  padding: 0 12px;
-  min-width: 0; /* Previene overflow */
+  padding: 0 16px;
 }
-
 .contenido > .contenedor-pagina {
   width: 100%;
   margin-left: auto;
@@ -154,115 +101,53 @@ body {
 /* =========================
    Estructura páginas admin
    ========================= */
-.contenedor-pagina { 
-  max-width: 1280px; 
-  margin: 16px auto; 
-  padding: 0;
-}
-
-.contenedor-pagina.ancho-xl { 
-  max-width: 1400px; 
-}
+.contenedor-pagina { max-width: 1280px; margin: 24px auto; padding: 0; }
+.contenedor-pagina.ancho-xl { max-width: 1400px; }
 
 .barra-pagina {
-  display: flex; 
-  align-items: center; 
-  gap: 12px; 
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
 }
+.titulo { margin: 0; }
 
-.titulo { 
-  margin: 0; 
-  font-size: 1.5rem;
-  line-height: 1.2;
+/* =========================
+   Formularios responsivos
+   ========================= */
+.formulario .fila-form { display: grid; gap: 12px; }
+@media (min-width: 720px) {
+  .formulario .fila-form { grid-template-columns: repeat(3, 1fr); }
 }
-
-/* Formularios */
-.formulario {
-  margin-bottom: 20px;
-}
-
-.formulario .fila-form { 
-  display: grid; 
-  gap: 12px; 
-}
-
-@media (min-width: 768px) {
-  .formulario .fila-form { 
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-  }
-}
-
-.grupo { 
-  margin-bottom: 12px; 
-}
-
-.grupo label { 
-  display: block; 
-  font-size: 14px; 
-  font-weight: 500;
-  margin-bottom: 6px; 
-  color: var(--texto);
-}
-
+.grupo label { display: block; font-size: 14px; margin-bottom: 6px; }
 .grupo input, .grupo select, .grupo textarea {
-  width: 100%; 
-  padding: 10px 12px; 
-  border-radius: 6px; 
-  border: 1px solid #cbd5e1; 
-  background: #fff;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
+  width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;
 }
 
-.grupo input:focus, .grupo select:focus, .grupo textarea:focus {
-  outline: none;
-  border-color: #0006BF;
-  box-shadow: 0 0 0 2px rgba(0, 6, 191, 0.1);
-}
-
-/* Grid responsivo mejorado para formularios */
+/* Grid 2 columnas responsivo */
 .grid-form-2 { 
   display: grid; 
-  gap: 16px; 
+  gap: 12px; 
 }
 
-/* Tablet: 2 columnas más tempranas */
-@media (min-width: 640px) {
+/* En tablets y desktop: 2 columnas */
+@media (min-width: 768px) {
   .grid-form-2 { 
     grid-template-columns: 1fr 1fr; 
-    align-items: start;
   }
 }
 
-/* Desktop: mantener 2 columnas pero con mejor espaciado */
-@media (min-width: 1024px) {
-  .grid-form-2 { 
-    gap: 20px; 
-  }
-}
+.grid-form-2 .grupo label { font-weight: 600; }
 
-.grid-form-2 .grupo label { 
-  font-weight: 600; 
-}
-
-/* Acciones centradas con mejor responsive */
+/* Acciones centradas */
 .acciones-centro { 
   display: flex; 
   gap: 10px; 
   justify-content: center; 
-  flex-wrap: wrap;
-  margin-top: 16px;
+  flex-wrap: wrap; 
 }
 
+/* En móvil: botones apilados */
 @media (max-width: 480px) {
   .acciones-centro {
     flex-direction: column;
-    align-items: stretch;
-  }
-  .acciones-centro .btn {
-    width: 100%;
   }
 }
 
@@ -271,421 +156,179 @@ body {
   display: flex; 
   align-items: baseline; 
   justify-content: space-between; 
-  margin-bottom: 12px;
-  gap: 12px;
+  margin-bottom: 8px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
+/* En móvil: apilar verticalmente */
 @media (max-width: 640px) {
   .cabecera-seccion {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
-  }
-  
-  .cabecera-seccion .grupo {
-    max-width: none !important;
   }
 }
 
-.titulo-seccion { 
-  margin: 0; 
-  font-size: 1.1rem;
-  font-weight: 600;
-}
+.titulo-seccion { margin: 0; }
 
-.nota { 
-  color: #64748b; 
-  display: block; 
-  margin-top: 8px; 
-  font-size: 0.9rem;
-}
+.nota { color: #64748b; display: block; margin-top: 8px; }
 
 /* =========================
-   Botones mejorados
+   Botones
    ========================= */
 .btn {
   border: 1px solid rgba(0,0,0,.2);
   background: #fff;
-  padding: 10px 16px;
-  border-radius: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
 }
+.btn:hover { box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.btn-primario { background: #0006BF; color: #fff; border-color: #0006BF; }
+.btn-secundario { background: #e2e8f0; }
+.btn-peligro { background: #fee2e2; border-color: #fecaca; }
+.btn-mini { padding: 6px 8px; font-size: 13px; }
 
-.btn:hover { 
-  box-shadow: 0 2px 8px rgba(0,0,0,.12); 
-  transform: translateY(-1px);
-}
-
-.btn:active {
-  transform: translateY(0);
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-primario { 
-  background: #0006BF; 
-  color: #fff; 
-  border-color: #0006BF; 
-}
-
-.btn-primario:hover {
-  background: #0005a8;
-  border-color: #0005a8;
-}
-
-.btn-secundario { 
-  background: #e2e8f0; 
-  border-color: #cbd5e1;
-}
-
-.btn-secundario:hover {
-  background: #cbd5e1;
-}
-
-.btn-peligro { 
-  background: #fee2e2; 
-  border-color: #fecaca; 
-  color: #dc2626;
-}
-
-.btn-peligro:hover {
-  background: #fecaca;
-  border-color: #f87171;
-}
-
-.btn-mini { 
-  padding: 6px 10px; 
-  font-size: 0.85rem; 
-  min-height: 32px;
+/* Botones en móvil */
+@media (max-width: 480px) {
+  .btn {
+    padding: 12px 16px;
+    width: 100%;
+  }
+  .btn-mini {
+    padding: 8px 12px;
+    width: auto;
+  }
 }
 
 .btn-sm {
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  min-height: 36px;
+  padding: 6px 10px;
+  font-size: .9rem;
+  border-radius: 6px;
+  line-height: 1.15;
 }
 
 .btn-lg {
-  padding: 12px 20px;
-  font-size: 1.05rem;
-  border-radius: 8px;
-  min-height: 48px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 10px;
+  line-height: 1.15;
 }
 
 /* =========================
-   Tablas responsivas mejoradas
+   Tablas responsivas
    ========================= */
 .tabla-contenedor { 
   width: 100%; 
   overflow-x: auto; 
-  -webkit-overflow-scrolling: touch;
-  border-radius: 8px;
-  border: 1px solid var(--borde);
-  background: #fff;
+  -webkit-overflow-scrolling: touch; 
 }
 
 .tabla {
   width: 100%;
   border-collapse: collapse;
   table-layout: auto;
-  margin: 0;
 }
-
 .tabla th, .tabla td {
   border-bottom: 1px solid #e2e8f0;
-  padding: 12px;
+  padding: 10px 12px;
   text-align: left;
-  vertical-align: middle;
-  white-space: nowrap;
+  vertical-align: top;
+  white-space: normal;
 }
 
-/* Responsive padding para celdas */
+/* En móvil: padding más pequeño */
 @media (max-width: 640px) {
   .tabla th, .tabla td {
     padding: 8px 6px;
-    font-size: 0.9rem;
+    font-size: 14px;
   }
 }
 
-.tabla thead th { 
-  font-weight: 600; 
-  font-size: 0.9rem; 
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.tabla tbody tr:hover {
-  background: #f8fafc;
-}
-
-.tabla tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.sin-datos { 
-  text-align: center; 
-  color: #64748b; 
-  font-style: italic;
-  padding: 20px;
-}
-
-.col-acciones { 
-  display: flex; 
-  gap: 6px; 
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-@media (max-width: 480px) {
-  .col-acciones {
-    flex-direction: column;
-    gap: 4px;
-  }
-}
-
-.col-obs { 
-  max-width: 280px; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  white-space: nowrap; 
-}
-
-@media (max-width: 768px) {
-  .col-obs {
-    max-width: 200px;
-  }
-}
+.tabla thead th { font-weight: 600; font-size: 14px; }
+.sin-datos { text-align: center; color: #64748b; }
+.col-acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+.col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Mejoras para tablas */
-.tabla--compacta th, .tabla--compacta td { 
-  padding: 10px 8px; 
-}
+.tabla--compacta th, .tabla--compacta td { padding: 8px 10px; }
 
-@media (max-width: 640px) {
-  .tabla--compacta th, .tabla--compacta td { 
-    padding: 8px 4px; 
-  }
-}
+/* Ancho mínimo para evitar que se compriman demasiado */
+.tabla--ancha { min-width: 600px; }
 
-/* Ancho mínimo solo para pantallas pequeñas */
-.tabla--ancha { 
-  min-width: 600px; 
-}
-
-@media (min-width: 768px) {
-  .tabla--ancha { 
-    min-width: 700px; 
-  }
-}
-
+/* En desktop: sin restricción de ancho mínimo */
 @media (min-width: 1024px) {
-  .tabla--ancha { 
-    min-width: 0; 
-  }
+  .tabla--ancha { min-width: 0; }
 }
 
-/* Primera columna sticky mejorada */
+/* Primera columna sticky */
 .tabla--sticky-first thead th:first-child,
 .tabla--sticky-first tbody td:first-child {
   position: sticky;
   left: 0;
-  z-index: 3;
-  background: #f8fafc;
-  border-right: 2px solid var(--borde);
-  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+  z-index: 1;
+  background: var(--menu);
+  border-right: 1px solid var(--borde);
 }
 
-.tabla--sticky-first tbody td:first-child {
-  background: #fff;
-}
-
-.tabla--sticky-first tbody tr:hover td:first-child {
-  background: #f8fafc;
-}
-
-/* Utilidades de celdas mejoradas */
-.td-wrap { 
-  word-break: break-word; 
-  overflow-wrap: anywhere; 
-  hyphens: auto;
-  white-space: normal;
-  max-width: 250px;
-}
-
-.td-num  { 
-  text-align: right; 
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
+/* Utilidades de celdas */
+.td-wrap { word-break: break-word; overflow-wrap: anywhere; hyphens: auto; }
+.td-num  { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* =========================
-   Utilidades responsive mejoradas
+   Utilidades responsive
    ========================= */
 @media (max-width: 768px) {
   .hide-md { display: none !important; }
 }
-
 @media (max-width: 640px) {
   .hide-sm { display: none !important; }
 }
-
 @media (max-width: 480px) {
   .hide-xs { display: none !important; }
 }
 
-/* Mostrar solo en móvil */
-@media (min-width: 769px) {
-  .show-mobile-only { display: none !important; }
-}
-
 /* =========================
-   Layout responsive mejorado
+   Layout responsive
    ========================= */
-@media (max-width: 1024px) {
-  .layout { 
-    grid-template-columns: 200px 1fr; 
-  }
-  
-  .sidebar {
-    padding: 10px;
-  }
-  
-  .sb-item, .sb-logout {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
-}
-
 @media (max-width: 768px) {
-  /* Layout móvil: contenido ocupa todo */
-  .layout { 
-    grid-template-columns: 1fr; 
-  }
+  /* Layout móvil: el contenido ocupa todo */
+  .layout { grid-template-columns: 1fr; }
 
-  /* Off-canvas sidebar */
+  /* Sidebar off-canvas */
   .sidebar.sidebar--overlay {
     position: fixed !important;
-    left: 0; 
-    top: 0; 
-    bottom: 0;
-    width: 280px;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transition: transform .3s ease;
   }
-  
   .sidebar.sidebar--overlay.sidebar--open {
     transform: translateX(0);
   }
 
-  .contenido { 
-    padding: 0 12px; 
-  }
-  
-  .contenedor-pagina {
-    margin: 8px auto;
-  }
+  .contenido { padding: 0 8px; }
 }
 
-@media (max-width: 480px) {
-  .contenido { 
-    padding: 0 8px; 
-  }
-  
-  .sidebar.sidebar--overlay {
-    width: 260px;
-  }
-  
-  .titulo {
-    font-size: 1.3rem;
-  }
-}
-
-/* Topbar mejorada */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--panel-top);
-  border-bottom: 1px solid var(--borde);
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
+/* Topbar solo en móvil */
 @media (min-width: 769px) {
-  .topbar { 
-    display: none !important; 
-  }
+  .topbar { display: none !important; }
 }
 
 /* =========================
-   Prevención de overflow
+   Prevención overflow
    ========================= */
-html, body { 
-  overflow-x: hidden; 
-}
+html, body { overflow-x: hidden; }
 
-.tarjeta { 
-  overflow: hidden; 
+.tarjeta { overflow: hidden; }
+
+.tabla-contenedor {
   max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* =========================
-   Mejoras de accesibilidad y UX
-   ========================= */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Focus visible para navegación con teclado */
-.btn:focus-visible,
-.input:focus-visible,
-.sb-item:focus-visible {
-  outline: 2px solid #0006BF;
-  outline-offset: 2px;
-}
-
-/* Mejoras para pantallas muy pequeñas */
-@media (max-width: 320px) {
-  .tarjeta {
-    padding: 12px;
-    margin: 8px auto;
-  }
-  
-  .grid-form-2 {
-    grid-template-columns: 1fr;
-  }
-  
-  .tabla th, .tabla td {
-    padding: 6px 4px;
-    font-size: 0.85rem;
-  }
-  
-  .btn {
-    padding: 8px 12px;
-    font-size: 0.9rem;
-  }
+/* En móvil: permitir cortes si es necesario */
+@media (max-width: 480px) {
+  .td-num, .td-wrap { word-break: break-all; }
 }

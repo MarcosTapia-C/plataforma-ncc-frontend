@@ -1,6 +1,6 @@
 // src/pages/admin/NegociacionesAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 /** Normaliza una negociación del backend a una fila plana para la tabla */
 function normalizarNeg(n) {
@@ -98,7 +98,9 @@ export default function NegociacionesAdmin() {
     () =>
       empresas.map((e) => ({
         id: e.id_empresa,
-        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${e.nombre_empresa}`,
+        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${
+          e.nombre_empresa
+        }`,
       })),
     [empresas]
   );
@@ -167,6 +169,21 @@ export default function NegociacionesAdmin() {
       alert("El campo Contrato es obligatorio.");
       return false;
     }
+    if (form.dotacion_total !== "" && Number(form.dotacion_total) < 0) {
+      alert("Dotación total debe ser ≥ 0.");
+      return false;
+    }
+    if (form.personal_sindicalizado !== "" && Number(form.personal_sindicalizado) < 0) {
+      alert("Personal sindicalizado debe ser ≥ 0.");
+      return false;
+    }
+    if (form.porcentaje_sindicalizado !== "") {
+      const p = Number(form.porcentaje_sindicalizado);
+      if (isNaN(p) || p < 0 || p > 100) {
+        alert("Porcentaje sindicalizado debe estar entre 0 y 100.");
+        return false;
+      }
+    }
     return true;
   };
 
@@ -221,185 +238,166 @@ export default function NegociacionesAdmin() {
     <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <h2>🤝 Negociaciones</h2>
 
-      {/* FORMULARIO RESPONSIVO */}
-      <form onSubmit={onSubmit} className="formulario" style={{ marginBottom: 20 }}>
-        
-        {/* Información básica */}
-        <div style={{ background: "#f8f9fa", padding: 15, borderRadius: 8, marginBottom: 15 }}>
-          <h3 style={{ margin: "0 0 15px 0", fontSize: "1.1rem" }}>Información básica</h3>
-          
-          <div className="grid-form-2">
-            <div className="grupo">
-              <label>Empresa *</label>
-              <select
-                className="input"
-                value={form.id_empresa}
-                onChange={(e) => setForm({ ...form, id_empresa: e.target.value })}
-              >
-                <option value="">Seleccionar Empresa</option>
-                {opcionesEmpresas.map((o) => (
-                  <option key={o.id} value={o.id}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grupo">
-              <label>Sindicato *</label>
-              <select
-                className="input"
-                value={form.id_sindicato}
-                onChange={(e) => setForm({ ...form, id_sindicato: e.target.value })}
-              >
-                <option value="">Seleccionar Sindicato</option>
-                {opcionesSindicatos.map((o) => (
-                  <option key={o.id} value={o.id}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grupo">
-              <label>Contrato *</label>
-              <input
-                className="input"
-                placeholder="Número de contrato"
-                value={form.contrato}
-                onChange={(e) => setForm({ ...form, contrato: e.target.value })}
-              />
-            </div>
-
-            <div className="grupo">
-              <label>Estado</label>
-              <select
-                className="input"
-                value={form.estado}
-                onChange={(e) => setForm({ ...form, estado: e.target.value })}
-              >
-                {ESTADOS.map((s) => (
-                  <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* FORMULARIO */}
+      <form onSubmit={onSubmit} className="formulario">
+        {/* Fila 1: Empresa / Sindicato */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Empresa</label>
+            <select
+              className="input"
+              value={form.id_empresa}
+              onChange={(e) => setForm({ ...form, id_empresa: e.target.value })}
+            >
+              <option value="">Seleccionar Empresa</option>
+              {opcionesEmpresas.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grupo">
+            <label>Sindicato</label>
+            <select
+              className="input"
+              value={form.id_sindicato}
+              onChange={(e) => setForm({ ...form, id_sindicato: e.target.value })}
+            >
+              <option value="">Seleccionar Sindicato</option>
+              {opcionesSindicatos.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Fechas */}
-        <div style={{ background: "#f8f9fa", padding: 15, borderRadius: 8, marginBottom: 15 }}>
-          <h3 style={{ margin: "0 0 15px 0", fontSize: "1.1rem" }}>Fechas</h3>
-          
-          <div className="grid-form-2">
-            <div className="grupo">
-              <label>Inicio negociación</label>
-              <input
-                className="input"
-                type="date"
-                value={form.fecha_inicio}
-                onChange={(e) => setForm({ ...form, fecha_inicio: e.target.value })}
-              />
-            </div>
-
-            <div className="grupo">
-              <label>Término negociación</label>
-              <input
-                className="input"
-                type="date"
-                value={form.fecha_termino}
-                onChange={(e) => setForm({ ...form, fecha_termino: e.target.value })}
-              />
-            </div>
-
-            <div className="grupo" style={{ gridColumn: "1 / -1" }}>
-              <label>Vigencia contrato comercial</label>
-              <input
-                className="input"
-                type="date"
-                value={form.vencimiento_contrato_comercial}
-                onChange={(e) =>
-                  setForm({ ...form, vencimiento_contrato_comercial: e.target.value })
-                }
-              />
-            </div>
+        {/* Fila 2: Contrato / Estado */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Contrato</label>
+            <input
+              className="input"
+              placeholder="Contrato (ej: 0000001)"
+              value={form.contrato}
+              onChange={(e) => setForm({ ...form, contrato: e.target.value })}
+            />
+          </div>
+          <div className="grupo">
+            <label>Estado</label>
+            <select
+              className="input"
+              value={form.estado}
+              onChange={(e) => setForm({ ...form, estado: e.target.value })}
+            >
+              {ESTADOS.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Datos numéricos */}
-        <div style={{ background: "#f8f9fa", padding: 15, borderRadius: 8, marginBottom: 15 }}>
-          <h3 style={{ margin: "0 0 15px 0", fontSize: "1.1rem" }}>Datos de personal</h3>
-          
-          <div className="grid-form-2">
-            <div className="grupo">
-              <label>Dotación total</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                placeholder="Total empleados"
-                value={form.dotacion_total}
-                onChange={(e) => setForm({ ...form, dotacion_total: e.target.value })}
-              />
-            </div>
-
-            <div className="grupo">
-              <label>Personal sindicalizado</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                placeholder="Empleados sindicalizados"
-                value={form.personal_sindicalizado}
-                onChange={(e) =>
-                  setForm({ ...form, personal_sindicalizado: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="grupo">
-              <label>% Sindicalizado</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                placeholder="Porcentaje"
-                value={form.porcentaje_sindicalizado}
-                onChange={(e) =>
-                  setForm({ ...form, porcentaje_sindicalizado: e.target.value })
-                }
-              />
-            </div>
+        {/* Fila 3: Fechas */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Inicio negociación</label>
+            <input
+              className="input"
+              type="date"
+              value={form.fecha_inicio}
+              onChange={(e) => setForm({ ...form, fecha_inicio: e.target.value })}
+            />
+          </div>
+          <div className="grupo">
+            <label>Término negociación</label>
+            <input
+              className="input"
+              type="date"
+              value={form.fecha_termino}
+              onChange={(e) => setForm({ ...form, fecha_termino: e.target.value })}
+            />
           </div>
         </div>
 
-        {/* Botones - Se apilan en móvil por CSS */}
-        <div className="acciones-centro">
-          <button
-            type="submit"
-            className="btn btn-primario"
-            disabled={cargando}
-          >
+        {/* Fila 4: Vencimiento contrato */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Vigencia contrato comercial</label>
+            <input
+              className="input"
+              type="date"
+              value={form.vencimiento_contrato_comercial}
+              onChange={(e) =>
+                setForm({ ...form, vencimiento_contrato_comercial: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        {/* Fila 5: Datos numéricos */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Dotación total</label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              placeholder="Dotación total"
+              value={form.dotacion_total}
+              onChange={(e) => setForm({ ...form, dotacion_total: e.target.value })}
+            />
+          </div>
+          <div className="grupo">
+            <label>Personal sindicalizado</label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              placeholder="Personal sindicalizado"
+              value={form.personal_sindicalizado}
+              onChange={(e) =>
+                setForm({ ...form, personal_sindicalizado: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        {/* Fila 6: Porcentaje */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>% Sindicalizado</label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="% Sindicalizado"
+              value={form.porcentaje_sindicalizado}
+              onChange={(e) =>
+                setForm({ ...form, porcentaje_sindicalizado: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primario" disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
           </button>
-          <button
-            type="button"
-            className="btn"
-            onClick={limpiar}
-            disabled={cargando}
-          >
+          <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
             Limpiar
           </button>
         </div>
       </form>
 
       {/* CABECERA + BUSCADOR */}
-      <div className="cabecera-seccion" style={{ marginBottom: 15 }}>
-        <h3 className="titulo-seccion">Listado ({filas.length})</h3>
+      <div className="cabecera-seccion">
+        <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
           <label>Buscar</label>
           <input
             className="input"
-            placeholder="Por empresa, minera, sindicato..."
+            placeholder="Por empresa, minera, sindicato o contrato…"
             value={filtro}
             onChange={(e) => setFiltro(e.target.value)}
           />
@@ -407,55 +405,42 @@ export default function NegociacionesAdmin() {
       </div>
 
       {/* TABLA */}
-      <div className="tabla-contenedor">
-        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
+      <div className="tabla-responsive">
+        <table className="tabla">
           <thead>
             <tr>
+              <th>Minera</th>
               <th>Empresa</th>
-              <th className="hide-sm">Minera</th>
-              <th className="hide-md">Sindicato</th>
-              <th className="hide-xs">Contrato</th>
-              <th>Estado</th>
-              <th className="hide-sm">Inicio</th>
-              <th className="hide-md">Término</th>
-              <th className="hide-md">Vencimiento</th>
+              <th>Sindicato</th>
+              <th>Contrato</th>
+              <th className="hide-mobile">Estado</th>
+              <th className="hide-mobile">Inicio</th>
+              <th className="hide-mobile">Término</th>
+              <th className="hide-mobile">Vencimiento</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {filas.map((n) => (
               <tr key={n.id}>
-                <td className="td-wrap">
-                  {n.empresa || "-"}
-                  {/* Info adicional en móvil */}
-                  <div className="hide-sm" style={{ fontSize: "0.85rem", color: "#666", marginTop: 4 }}>
-                    {n.minera && `Minera: ${n.minera}`}
-                    {n.contrato && <div>Contrato: {n.contrato}</div>}
-                  </div>
-                </td>
-                <td className="hide-sm td-wrap">{n.minera || "-"}</td>
-                <td className="hide-md td-wrap">{n.sindicato || "-"}</td>
-                <td className="hide-xs td-num">{n.contrato || "-"}</td>
-                <td style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
-                <td className="hide-sm">{formatearFecha(n.fecha_inicio)}</td>
-                <td className="hide-md">{formatearFecha(n.fecha_termino)}</td>
-                <td className="hide-md">{formatearFecha(n.vencimiento)}</td>
+                <td>{n.minera || "-"}</td>
+                <td>{n.empresa || "-"}</td>
+                <td>{n.sindicato || "-"}</td>
+                <td>{n.contrato || "-"}</td>
+                <td className="hide-mobile" style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
+                <td className="hide-mobile">{formatearFecha(n.fecha_inicio)}</td>
+                <td className="hide-mobile">{formatearFecha(n.fecha_termino)}</td>
+                <td className="hide-mobile">{formatearFecha(n.vencimiento)}</td>
                 <td className="col-acciones">
-                  <button
-                    className="btn btn-mini"
-                    onClick={() => onEditar(n)}
-                    disabled={cargando}
-                    title="Editar"
-                  >
-                    ✏️
+                  <button className="btn btn-mini" onClick={() => onEditar(n)} disabled={cargando}>
+                    Editar
                   </button>
                   <button
                     className="btn btn-mini btn-peligro"
                     onClick={() => onEliminar(n)}
                     disabled={cargando}
-                    title="Eliminar"
                   >
-                    🗑️
+                    Eliminar
                   </button>
                 </td>
               </tr>
@@ -463,7 +448,7 @@ export default function NegociacionesAdmin() {
             {filas.length === 0 && (
               <tr>
                 <td className="sin-datos" colSpan={9}>
-                  {filtro ? "No se encontraron resultados" : "Sin resultados"}
+                  Sin resultados
                 </td>
               </tr>
             )}
@@ -471,11 +456,10 @@ export default function NegociacionesAdmin() {
         </table>
       </div>
 
-      {/* Indicador de carga */}
       {cargando && (
-        <div style={{ textAlign: "center", marginTop: 15, padding: 10, background: "#f5f5f5", borderRadius: 5 }}>
-          <small className="nota">Procesando…</small>
-        </div>
+        <small className="nota" style={{ display: "block", marginTop: 8 }}>
+          Procesando…
+        </small>
       )}
     </div>
   );

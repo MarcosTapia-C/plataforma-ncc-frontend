@@ -1,12 +1,12 @@
 // src/pages/admin/ListaNegociaciones.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 export default function ListaNegociaciones() {
   const [negociaciones, setNegociaciones] = useState([]);
   const [cargando, setCargando] = useState(false);
 
-  // NUEVO: buscador
+  // Buscador
   const [filtro, setFiltro] = useState("");
 
   const cargar = async () => {
@@ -43,14 +43,14 @@ export default function ListaNegociaciones() {
   function formatoFecha(valor) {
     if (!valor) return "-";
     const fecha = new Date(valor);
-    if (isNaN(fecha)) return valor; // si no es válido, lo muestro tal cual
+    if (isNaN(fecha)) return valor;
     const d = String(fecha.getDate()).padStart(2, "0");
     const m = String(fecha.getMonth() + 1).padStart(2, "0");
     const y = fecha.getFullYear();
     return `${d}-${m}-${y}`;
   }
 
-  // NUEVO: filtrado en memoria
+  // Filtrado en memoria
   const negociacionesFiltradas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return negociaciones;
@@ -69,13 +69,12 @@ export default function ListaNegociaciones() {
     });
   }, [negociaciones, filtro]);
 
-  // === UI estilo "Empresas": tarjeta centrada y ancha ===
   return (
     <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <h2>📑 Lista de Negociaciones</h2>
 
-      {/* NUEVO: cabecera con buscador */}
-      <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
+      {/* Cabecera con buscador */}
+      <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
           <label>Buscar</label>
@@ -88,55 +87,41 @@ export default function ListaNegociaciones() {
         </div>
       </div>
 
-      {/* TABLA */}
-      <div className="tabla-contenedor">
-        <table
-          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
-          style={{ width: "100%" }}
-        >
+      <div className="tabla-responsive">
+        <table className="tabla">
           <thead>
             <tr>
               <th>Empresa</th>
-              <th translate="no">RUT</th>
-              <th className="hide-xs">Minera</th>
-              <th className="hide-md">Sindicato</th>
-              <th>Estado</th>
-              <th>Inicio</th>
-              <th>Término</th>
-              <th className="hide-md">Dotación</th>
-              <th className="hide-md">Sindicalizados</th>
-              <th>% Sindicalizados</th>
+              <th className="hide-mobile" translate="no">RUT</th>
+              <th>Minera</th>
+              <th>Sindicato</th>
+              <th className="hide-mobile">Estado</th>
+              <th className="hide-mobile">Inicio</th>
+              <th className="hide-mobile">Término</th>
+              <th className="hide-mobile">Dotación</th>
+              <th className="hide-mobile">Sindicalizados</th>
+              <th className="hide-mobile">% Sindicalizados</th>
             </tr>
           </thead>
           <tbody>
             {negociacionesFiltradas.map((n) => (
               <tr key={n.id_negociacion}>
-                <td className="td-wrap">{n.Empresa?.nombre_empresa || "-"}</td>
-                <td className="td-num" translate="no">
-                  {n.Empresa?.rut_empresa || "-"}
+                <td>{n.Empresa?.nombre_empresa || "-"}</td>
+                <td className="hide-mobile" translate="no">{n.Empresa?.rut_empresa || "-"}</td>
+                <td>{n.Empresa?.Minera?.nombre_minera || "-"}</td>
+                <td>{n.Sindicato?.nombre_sindicato || "-"}</td>
+                <td className="hide-mobile" style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
+                <td className="hide-mobile">{formatoFecha(n.fecha_inicio)}</td>
+                <td className="hide-mobile">{formatoFecha(n.fecha_termino)}</td>
+                <td className="hide-mobile">
+                  {Number.isFinite(Number(n.dotacion_total)) ? n.dotacion_total : "-"}
                 </td>
-                <td className="hide-xs td-wrap">
-                  {n.Empresa?.Minera?.nombre_minera || "-"}
-                </td>
-                <td className="hide-md td-wrap">
-                  {n.Sindicato?.nombre_sindicato || "-"}
-                </td>
-                <td style={{ textTransform: "capitalize" }}>
-                  {n.estado || "-"}
-                </td>
-                <td>{formatoFecha(n.fecha_inicio)}</td>
-                <td>{formatoFecha(n.fecha_termino)}</td>
-                <td className="hide-md td-num">
-                  {Number.isFinite(Number(n.dotacion_total))
-                    ? n.dotacion_total
-                    : "-"}
-                </td>
-                <td className="hide-md td-num">
+                <td className="hide-mobile">
                   {Number.isFinite(Number(n.personal_sindicalizado))
                     ? n.personal_sindicalizado
                     : "-"}
                 </td>
-                <td className="td-num">{formatoPorcentaje(n)}</td>
+                <td className="hide-mobile">{formatoPorcentaje(n)}</td>
               </tr>
             ))}
             {negociacionesFiltradas.length === 0 && (

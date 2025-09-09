@@ -1,3 +1,4 @@
+// src/pages/Admin/MonitoreoAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
@@ -11,11 +12,11 @@ export default function MonitoreoAdmin() {
   const [coment, setComent] = useState("");
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(false);
-
-  // buscador
   const [filtro, setFiltro] = useState("");
 
-  useEffect(() => { cargarTodo(); }, []);
+  useEffect(() => {
+    cargarTodo();
+  }, []);
 
   async function cargarTodo() {
     setCargando(true);
@@ -69,7 +70,9 @@ export default function MonitoreoAdmin() {
         const payload = {
           id_negociacion: Number(idNeg),
           comentarios: coment,
-          ...(fecha === "" ? { fecha_inicio_monitoreo: "" } : { fecha_inicio_monitoreo: fecha }),
+          ...(fecha === ""
+            ? { fecha_inicio_monitoreo: "" }
+            : { fecha_inicio_monitoreo: fecha }),
         };
         await api.put(`/monitoreos/${editId}`, payload);
       } else {
@@ -111,7 +114,10 @@ export default function MonitoreoAdmin() {
       const st = err?.response?.status;
       const data = err?.response?.data;
       if (st === 409) {
-        alert(data?.mensaje || "No se puede eliminar: existen registros dependientes asociados.");
+        alert(
+          data?.mensaje ||
+            "No se puede eliminar: existen registros dependientes asociados."
+        );
       } else {
         const msg =
           data?.mensaje ||
@@ -144,42 +150,30 @@ export default function MonitoreoAdmin() {
       <h2>👁️ Registro de Monitoreo</h2>
 
       {/* FORMULARIO */}
-      <form onSubmit={guardar} className="formulario" style={{ marginBottom: 12 }}>
-        {/* Fila 1: Negociación / Acciones */}
-        <div className="grid-form-2">
+      <form onSubmit={guardar} className="formulario">
+        {/* Fila 1: Negociación */}
+        <div className="form-row">
           <div className="grupo">
             <label>Negociación</label>
-            <select className="input" value={idNeg} onChange={(e) => setIdNeg(e.target.value)}>
-              <option value="">Seleccionar negociación</option>
+            <select 
+              className="input"
+              value={idNeg} 
+              onChange={(e) => setIdNeg(e.target.value)}
+            >
+              <option value="">Seleccionar Negociación</option>
               {opcionesNeg.map((o) => (
-                <option key={o.id} value={o.id}>{o.label}</option>
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
               ))}
             </select>
           </div>
-
-          <div className="acciones-centro" style={{ alignItems: "end" }}>
-            <button
-              type="submit"
-              className="btn btn-primario"
-              disabled={cargando}
-            >
-              {editId ? "Actualizar" : "Guardar"}
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={limpiar}
-              disabled={cargando}
-            >
-              Cancelar
-            </button>
-          </div>
         </div>
 
-        {/* Fila 2: Fecha + Comentarios */}
-        <div className="grid-form-2">
+        {/* Fila 2: Fecha */}
+        <div className="form-row">
           <div className="grupo">
-            <label>Fecha de inicio del monitoreo</label>
+            <label>Fecha inicio monitoreo</label>
             <input
               className="input"
               type="date"
@@ -190,8 +184,11 @@ export default function MonitoreoAdmin() {
               Si dejas vacío: se usa la <b>fecha de inicio</b> de la negociación.
             </small>
           </div>
+        </div>
 
-          <div className="grupo" style={{ gridColumn: "1 / -1" }}>
+        {/* Fila 3: Comentarios */}
+        <div className="form-row">
+          <div className="grupo">
             <label>Comentarios</label>
             <textarea
               className="input"
@@ -202,10 +199,20 @@ export default function MonitoreoAdmin() {
             />
           </div>
         </div>
+
+        {/* Botones */}
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primario" disabled={cargando}>
+            {editId ? "Actualizar" : "Guardar"}
+          </button>
+          <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
+            Cancelar
+          </button>
+        </div>
       </form>
 
       {/* CABECERA / BUSCADOR */}
-      <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
+      <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 280 }}>
           <label>Buscar</label>
@@ -219,14 +226,14 @@ export default function MonitoreoAdmin() {
       </div>
 
       {/* TABLA */}
-      <div className="tabla-contenedor">
-        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
+      <div className="tabla-responsive">
+        <table className="tabla">
           <thead>
             <tr>
               <th>Negociación</th>
-              <th>Fecha inicio monitoreo</th>
-              <th className="hide-md">Comentarios</th>
-              <th style={{ width: 170 }}>Acciones</th>
+              <th className="hide-mobile">Fecha inicio</th>
+              <th className="hide-mobile">Comentarios</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -234,14 +241,18 @@ export default function MonitoreoAdmin() {
               const neg = opcionesNeg.find((n) => n.id === row.id_negociacion);
               return (
                 <tr key={row.id_monitoreo}>
-                  <td className="td-wrap">{neg?.label || row.id_negociacion}</td>
-                  <td>{row.fecha_inicio_monitoreo || "-"}</td>
-                  <td className="hide-md td-wrap col-obs">{row.comentarios || "-"}</td>
+                  <td>{neg?.label || row.id_negociacion}</td>
+                  <td className="hide-mobile">{row.fecha_inicio_monitoreo || "-"}</td>
+                  <td className="hide-mobile col-obs">{row.comentarios || "-"}</td>
                   <td className="col-acciones">
                     <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>
                       Editar
                     </button>
-                    <button className="btn btn-mini btn-peligro" onClick={() => eliminar(row)} disabled={cargando}>
+                    <button
+                      className="btn btn-mini btn-peligro"
+                      onClick={() => eliminar(row)}
+                      disabled={cargando}
+                    >
                       Eliminar
                     </button>
                   </td>
@@ -250,14 +261,20 @@ export default function MonitoreoAdmin() {
             })}
             {filtrados.length === 0 && (
               <tr>
-                <td className="sin-datos" colSpan={4}>Sin resultados</td>
+                <td className="sin-datos" colSpan={4}>
+                  Sin resultados
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {cargando && <small className="nota" style={{ display: "block", marginTop: 8 }}>Procesando…</small>}
+      {cargando && (
+        <small className="nota" style={{ display: "block", marginTop: 8 }}>
+          Procesando…
+        </small>
+      )}
     </div>
   );
 }

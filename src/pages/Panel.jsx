@@ -1,59 +1,45 @@
 // src/pages/Panel.jsx
-import React, { useEffect, useState, useCallback } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export default function Panel({ usuario, onSalir }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const esAdmin = usuario?.id_rol === 1;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Estado: menu móvil
-  const [menuAbierto, setMenuAbierto] = useState(false);
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
-  // Cerrar con ESC y al cambiar de ruta
-  useEffect(() => {
-    const onEsc = (e) => e.key === "Escape" && setMenuAbierto(false);
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, []);
-  useEffect(() => {
-    // al navegar, cerrar menú móvil
-    setMenuAbierto(false);
-  }, [location.pathname]);
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
 
-  // Evitar scroll del body con el menú abierto
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    if (menuAbierto) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = prev || "";
-    return () => (document.body.style.overflow = prev || "");
-  }, [menuAbierto]);
-
-  const ir = useCallback(
-    (ruta) => {
-      navigate(ruta);
-      // se cierra por el efecto de location, pero cerramos aquí también por UX
-      setMenuAbierto(false);
-    },
-    [navigate]
-  );
+  const handleNavigation = (path) => {
+    navigate(path);
+    closeSidebar(); // Cerrar sidebar después de navegar en móvil
+  };
 
   return (
     <div className="layout">
-      {/* Sidebar */}
-      <aside
-        className={`sidebar ${menuAbierto ? "sidebar--open" : ""} sidebar--overlay`}
-        // Inline mínimos para asegurar comportamiento aunque falte CSS nuevo
-        style={{
-          // Desktop: como estaba (grid). En móvil: off-canvas fijo.
-          // Estos inline son "fallbacks"; ideal mover a styles.css con media queries.
-          position: "sticky",
-          top: 0,
-          height: "100svh",
-          zIndex: 30,
-        }}
-        aria-label="Menú principal"
-      >
+      {/* Barra superior móvil */}
+      <div className="topbar">
+        <button className="menu-toggle" onClick={toggleSidebar}>
+          ☰
+        </button>
+        <div style={{ fontWeight: 600 }}>
+          {esAdmin ? "Administrador" : "Usuario"}
+        </div>
+      </div>
+
+      {/* Overlay para cerrar sidebar en móvil */}
+      <div 
+        className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      {/* Menú lateral */}
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         {/* Bloque superior */}
         <div
           className="sb-top bg-top borde"
@@ -68,113 +54,96 @@ export default function Panel({ usuario, onSalir }) {
               display: "grid",
               placeItems: "center",
               border: "1px solid var(--borde)",
-              flex: "0 0 36px",
             }}
             aria-hidden
           >
             👤
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 700, lineHeight: 1, whiteSpace: "nowrap" }}>
+          <div>
+            <div style={{ fontWeight: 700, lineHeight: 1 }}>
               {esAdmin ? "Administrador" : "Usuario"}
             </div>
-            <div style={{ fontSize: 12, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: 12, opacity: 0.8 }}>
               {usuario?.nombre
                 ? `${usuario.nombre} ${usuario.apellido || ""}`.trim()
                 : usuario?.usuario || ""}
             </div>
           </div>
         </div>
-
+        
         {/* Menú lateral */}
-        <nav className="sb-menu" role="navigation">
-          <button type="button" className="sb-item" onClick={() => ir("/panel")}>
+        <nav className="sb-menu">
+          <button type="button" className="sb-item" onClick={() => handleNavigation("/panel")}>
             🏠 Inicio
           </button>
-
           {esAdmin && (
             <>
-              <button type="button" className="sb-item" onClick={() => ir("/panel/usuarios")}>
+              <button
+                type="button"
+                className="sb-item"
+                onClick={() => handleNavigation("/panel/usuarios")}
+              >
                 👥 Usuarios
               </button>
-              <button type="button" className="sb-item" onClick={() => ir("/panel/empresas")}>
+              <button
+                type="button"
+                className="sb-item"
+                onClick={() => handleNavigation("/panel/empresas")}
+              >
                 🏢 Empresas
               </button>
-              <button type="button" className="sb-item" onClick={() => ir("/panel/sindicatos")}>
+              <button
+                type="button"
+                className="sb-item"
+                onClick={() => handleNavigation("/panel/sindicatos")}
+              >
                 ✊ Sindicatos
               </button>
-              <button type="button" className="sb-item" onClick={() => ir("/panel/mineras")}>
+              <button
+                type="button"
+                className="sb-item"
+                onClick={() => handleNavigation("/panel/mineras")}
+              >
                 ⛏️ Mineras
               </button>
-              <button type="button" className="sb-item" onClick={() => ir("/panel/negociaciones")}>
+              <button
+                type="button"
+                className="sb-item"
+                onClick={() => handleNavigation("/panel/negociaciones")}
+              >
                 🤝 Negociaciones
               </button>
-              <button type="button" className="sb-item" onClick={() => ir("/panel/monitoreo")}>
+              <button
+                type="button"
+                className="sb-item"
+                onClick={() => handleNavigation("/panel/monitoreo")}
+              >
                 👁️ Monitoreo
               </button>
             </>
           )}
-
-          <button type="button" className="sb-item" onClick={() => ir("/panel/lista")}>
+          <button
+            type="button"
+            className="sb-item"
+            onClick={() => handleNavigation("/panel/lista")}
+          >
             🗂️ Lista
           </button>
-          <button type="button" className="sb-item" onClick={() => ir("/panel/informes")}>
+          <button
+            type="button"
+            className="sb-item"
+            onClick={() => handleNavigation("/panel/informes")}
+          >
             📊 Reportes
           </button>
         </nav>
-
         <button className="sb-logout" onClick={onSalir}>
           ↩️ Cerrar sesión
         </button>
       </aside>
 
-      {/* Contenido + Topbar móvil */}
+      {/* Contenido principal */}
       <main className="contenido">
-        {/* Barra superior visible en móviles: botón hamburguesa + título/presentación */}
-        <div
-          className="topbar"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "10px 8px",
-            position: "sticky",
-            top: 0,
-            zIndex: 20,
-            background: "var(--panel-top)",
-            borderBottom: "1px solid var(--borde)",
-          }}
-        >
-          <button
-            type="button"
-            className="btn"
-            aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
-            onClick={() => setMenuAbierto((v) => !v)}
-            style={{ padding: "6px 10px" }}
-          >
-            {menuAbierto ? "✖" : "☰"}
-          </button>
-          <div style={{ fontWeight: 600 }}>Panel</div>
-          <div style={{ marginLeft: "auto", fontSize: 12, opacity: 0.8 }}>
-            {esAdmin ? "Administrador" : "Usuario"}
-          </div>
-        </div>
-
-        {/* Backdrop móvil */}
-        {menuAbierto && (
-          <div
-            role="button"
-            aria-label="Cerrar menú"
-            onClick={() => setMenuAbierto(false)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,.35)",
-              zIndex: 20,
-            }}
-          />
-        )}
-
         <Outlet />
       </main>
     </div>

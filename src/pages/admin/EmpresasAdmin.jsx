@@ -1,6 +1,6 @@
 // src/pages/admin/EmpresasAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 /** Helpers RUT (formato visual) */
 function limpiarRut(v = "") {
@@ -48,7 +48,7 @@ export default function EmpresasAdmin() {
     }
   }
 
-  // Filtrado en memoria
+  // Filtrar en memoria
   const empresasFiltradas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return empresas;
@@ -174,13 +174,13 @@ export default function EmpresasAdmin() {
   }
 
   return (
-    <div className="tarjeta" style={{ maxWidth: "1000px", margin: "0 auto" }}>
+    <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>🏢 Empresas Contratistas</h2>
 
-      {/* FORMULARIO RESPONSIVO */}
-      <form onSubmit={guardar} className="formulario" style={{ marginBottom: 20 }}>
-        {/* Grid responsivo: 2 columnas en desktop, 1 en móvil */}
-        <div className="grid-form-2">
+      {/* FORMULARIO */}
+      <form onSubmit={guardar} className="formulario">
+        {/* Fila 1: Nombre / RUT */}
+        <div className="form-row">
           <div className="grupo">
             <label>Nombre de la empresa</label>
             <input
@@ -190,12 +190,11 @@ export default function EmpresasAdmin() {
               onChange={(e) => setNombre(e.target.value)}
             />
           </div>
-
           <div className="grupo">
             <label>RUT Empresa</label>
             <input
               className="input"
-              placeholder="12.345.678-9"
+              placeholder="RUT Empresa"
               value={formatearRutDesdeRaw(rutRaw)}
               onChange={(e) => setRutRaw(limpiarRut(e.target.value))}
               translate="no"
@@ -203,7 +202,8 @@ export default function EmpresasAdmin() {
           </div>
         </div>
 
-        <div className="grid-form-2">
+        {/* Fila 2: Minera */}
+        <div className="form-row">
           <div className="grupo">
             <label>Minera</label>
             <select
@@ -219,32 +219,26 @@ export default function EmpresasAdmin() {
               ))}
             </select>
           </div>
+        </div>
 
-          {/* En móvil, los botones se apilan verticalmente por CSS */}
-          <div className="acciones-centro" style={{ alignItems: "end" }}>
-            <button
-              type="submit"
-              onClick={guardar}
-              className="btn btn-primario"
-              disabled={cargando}
-            >
-              {editando ? "Actualizar" : "Agregar"}
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={limpiar}
-              disabled={cargando}
-            >
-              Limpiar
-            </button>
-          </div>
+        {/* Botones */}
+        <div className="form-actions">
+          <button
+            type="submit"
+            className="btn btn-primario"
+            disabled={cargando}
+          >
+            {editando ? "Actualizar" : "Agregar"}
+          </button>
+          <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
+            Limpiar
+          </button>
         </div>
       </form>
 
-      {/* Cabecera con buscador - Se apila en móvil por CSS */}
-      <div className="cabecera-seccion" style={{ marginBottom: 15 }}>
-        <h3 className="titulo-seccion">Listado ({empresasFiltradas.length})</h3>
+      {/* Cabecera con buscador */}
+      <div className="cabecera-seccion">
+        <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
           <label>Buscar</label>
           <input
@@ -256,37 +250,28 @@ export default function EmpresasAdmin() {
         </div>
       </div>
 
-      {/* TABLA RESPONSIVA */}
-      <div className="tabla-contenedor">
-        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
+      {/* TABLA */}
+      <div className="tabla-responsive">
+        <table className="tabla">
           <thead>
             <tr>
-              <th>Nombre empresa</th>
-              <th translate="no">RUT</th>
-              <th className="hide-sm">Minera</th>
+              <th>Nombre de la empresa</th>
+              <th className="hide-mobile" translate="no">RUT</th>
+              <th>Minera</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {empresasFiltradas.map((e) => (
               <tr key={e.id_empresa}>
-                <td className="td-wrap">
-                  {e.nombre_empresa}
-                  {/* Mostrar minera en móvil cuando la columna está oculta */}
-                  <div className="hide-sm" style={{ fontSize: "0.85rem", color: "#666", marginTop: "4px" }}>
-                    Minera: {e.Minera?.nombre_minera || e.id_minera}
-                  </div>
-                </td>
-                <td className="td-num" translate="no">{e.rut_empresa}</td>
-                <td className="hide-sm td-wrap">
-                  {e.Minera?.nombre_minera || e.id_minera}
-                </td>
+                <td>{e.nombre_empresa}</td>
+                <td className="hide-mobile" translate="no">{e.rut_empresa}</td>
+                <td>{e.Minera?.nombre_minera || e.id_minera}</td>
                 <td className="col-acciones">
                   <button
                     className="btn btn-mini"
                     onClick={() => editar(e)}
                     disabled={cargando}
-                    title="Editar"
                   >
                     ✏️
                   </button>
@@ -294,7 +279,6 @@ export default function EmpresasAdmin() {
                     className="btn btn-mini btn-peligro"
                     onClick={() => eliminar(e.id_empresa)}
                     disabled={cargando}
-                    title="Eliminar"
                   >
                     🗑️
                   </button>
@@ -304,7 +288,7 @@ export default function EmpresasAdmin() {
             {empresasFiltradas.length === 0 && (
               <tr>
                 <td className="sin-datos" colSpan={4}>
-                  {filtro ? "No se encontraron resultados" : "Sin datos para mostrar"}
+                  Sin datos para mostrar
                 </td>
               </tr>
             )}
@@ -312,11 +296,10 @@ export default function EmpresasAdmin() {
         </table>
       </div>
 
-      {/* Indicador de carga simple */}
       {cargando && (
-        <div style={{ textAlign: "center", marginTop: 15, padding: 10, background: "#f5f5f5", borderRadius: 5 }}>
-          <small className="nota">Procesando…</small>
-        </div>
+        <small className="nota" style={{ display: "block", marginTop: 8 }}>
+          Procesando…
+        </small>
       )}
     </div>
   );

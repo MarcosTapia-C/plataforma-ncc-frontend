@@ -99,21 +99,19 @@ export default function MinerasAdmin() {
     );
   }, [mineras, filtro]);
 
+  // ===== UI =====
   return (
     <div className="tarjeta" style={{ maxWidth: "450px", margin: "0 auto" }}>
       <h2>⛏️ Mineras</h2>
 
+      {/* FORMULARIO */}
       <form
         onSubmit={onGuardar}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          marginBottom: "15px",
-        }}
+        className="formulario"
+        style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}
       >
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Nombre de la minera</label>
             <input
               className="input"
@@ -122,17 +120,22 @@ export default function MinerasAdmin() {
               onChange={(e) => setNombre(e.target.value)}
             />
           </div>
+
+          {/* Botones pequeños */}
+          <div className="acciones-centro" style={{ alignItems: "end" }}>
+            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
+              {editId ? "Actualizar" : "Guardar"}
+            </button>
+            <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
+              Limpiar
+            </button>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
-            {editId ? "Actualizar" : "Guardar"}
-          </button>
-          <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
-            Limpiar
-          </button>
-
-          <div className="grupo" style={{ marginLeft: "auto", maxWidth: 260 }}>
+        {/* Buscador alineado a la derecha */}
+        <div className="cabecera-seccion" style={{ marginTop: 4 }}>
+          <h3 className="titulo-seccion">Listado</h3>
+          <div className="grupo" style={{ maxWidth: 260 }}>
             <label>Buscar</label>
             <input
               className="input"
@@ -144,8 +147,9 @@ export default function MinerasAdmin() {
         </div>
       </form>
 
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      {/* TABLA */}
+      <div className="tabla-contenedor">
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
               <th>Nombre</th>
@@ -155,13 +159,9 @@ export default function MinerasAdmin() {
           <tbody>
             {minerasFiltradas.map((m) => (
               <tr key={m.id_minera}>
-                <td>{m.nombre_minera}</td>
+                <td className="td-wrap">{m.nombre_minera}</td>
                 <td className="col-acciones">
-                  <button
-                    className="btn btn-mini"
-                    onClick={() => onEditar(m)}
-                    disabled={cargando}
-                  >
+                  <button className="btn btn-mini" onClick={() => onEditar(m)} disabled={cargando}>
                     Editar
                   </button>
                   <button

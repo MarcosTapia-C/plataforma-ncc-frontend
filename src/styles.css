@@ -59,11 +59,13 @@ body {
   min-height: 100svh;
 }
 
+/* Sidebar base (desktop) */
 .sidebar {
   background: var(--menu);
   border-right: 1px solid var(--borde);
   display: flex; flex-direction: column;
   gap: 10px; padding: 12px;
+  position: sticky; top: 0; height: 100svh; z-index: 30;
 }
 
 .sb-top { padding: 10px; border-radius: 8px; }
@@ -123,11 +125,12 @@ body {
 .grid-form-2 .grupo label { font-weight: 600; }
 
 /* Acciones centradas */
-.acciones-centro { display: flex; gap: 10px; justify-content: center; }
+.acciones-centro { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
 /* Secciones */
 .cabecera-seccion {
   display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
+  gap: 8px;
 }
 .titulo-seccion { margin: 0; }
 
@@ -153,7 +156,8 @@ body {
    Tablas
    ========================= */
 .tabla-responsive { overflow: auto; }
-.tabla-contenedor { width: 100%; overflow-x: auto; } /* usada en Monitoreo */
+.tabla-contenedor { width: 100%; overflow-x: auto; }
+
 .tabla {
   width: 100%;
   border-collapse: collapse;
@@ -164,10 +168,69 @@ body {
   padding: 10px 12px;
   text-align: left;
   vertical-align: top;
-  white-space: normal; /* default consistente (evita pisadas previas) */
+  white-space: normal;
 }
 .tabla thead th { font-weight: 600; font-size: 14px; }
 .sin-datos { text-align: center; color: #64748b; }
-.col-acciones { display: flex; gap: 6px; }
+.col-acciones { display: flex; gap: 6px; flex-wrap: wrap; }
 .col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Mejoras nuevas para tablas */
+.tabla--compacta th, .tabla--compacta td { padding: 8px 10px; }
+.tabla--ancha { min-width: 920px; } /* ayuda a scroll horizontal cuando corresponde */
+
+/* Primera columna sticky (útil en móvil) */
+.tabla--sticky-first thead th:first-child,
+.tabla--sticky-first tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--menu);
+  box-shadow: 1px 0 0 0 var(--borde);
+}
+
+/* Utilidades de celdas */
+.td-wrap { word-break: break-word; overflow-wrap: anywhere; hyphens: auto; }
+.td-num  { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* =========================
+   Utilidades responsive para ocultar columnas
+   (se aplican en th y td)
+   ========================= */
+@media (max-width: 768px) {
+  .hide-md { display: none !important; }
+}
+@media (max-width: 480px) {
+  .hide-xs { display: none !important; }
+}
+
+/* =========================
+   Ajustes responsive globales
+   ========================= */
+@media (max-width: 900px) {
+  .cabecera-seccion { align-items: center; }
+}
+
+@media (max-width: 768px) {
+  /* Layout: el contenido ocupa todo, la sidebar pasa a off-canvas */
+  .layout { grid-template-columns: 1fr; }
+
+  /* Off-canvas (usa clases agregadas en Panel.jsx) */
+  .sidebar.sidebar--overlay {
+    position: fixed !important;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+  }
+  .sidebar.sidebar--overlay.sidebar--open {
+    transform: translateX(0);
+  }
+
+  .contenido { padding: 0 8px; }
+}
+
+/* Topbar solo en móvil (si existe el nodo .topbar) */
+@media (min-width: 769px) {
+  .topbar { display: none !important; }
+}

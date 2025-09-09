@@ -12,6 +12,8 @@ export default function MonitoreoAdmin() {
   const [coment, setComent] = useState("");
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(false);
+
+  // buscador
   const [filtro, setFiltro] = useState("");
 
   useEffect(() => {
@@ -145,26 +147,22 @@ export default function MonitoreoAdmin() {
     });
   }, [items, filtro, opcionesNeg]);
 
-  // ===== UI estilo "Empresas": tarjeta centrada y ancha =====
+  // ===== UI =====
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>👁️ Registro de Monitoreo</h2>
 
-      {/* FORMULARIO (filas flex como Empresas) */}
-      <form
-        onSubmit={guardar}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          marginBottom: "15px",
-        }}
-      >
-        {/* Fila 1: Negociación (con label) */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+      {/* FORMULARIO */}
+      <form onSubmit={guardar} className="formulario" style={{ marginBottom: 12 }}>
+        {/* Fila 1: Negociación / Acciones */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Negociación</label>
-            <select value={idNeg} onChange={(e) => setIdNeg(e.target.value)}>
+            <select
+              className="input"
+              value={idNeg}
+              onChange={(e) => setIdNeg(e.target.value)}
+            >
               <option value="">Seleccionar Negociación</option>
               {opcionesNeg.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -173,13 +171,32 @@ export default function MonitoreoAdmin() {
               ))}
             </select>
           </div>
+
+          <div className="acciones-centro">
+            <button
+              type="submit"
+              className="btn btn-primario"
+              disabled={cargando}
+            >
+              {editId ? "Actualizar" : "Guardar"}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={limpiar}
+              disabled={cargando}
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
 
-        {/* Fila 2: Fecha inicio monitoreo */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        {/* Fila 2: Fecha */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Fecha inicio monitoreo</label>
             <input
+              className="input"
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
@@ -188,13 +205,12 @@ export default function MonitoreoAdmin() {
               Si dejas vacío: se usa la <b>fecha de inicio</b> de la negociación.
             </small>
           </div>
-        </div>
 
-        {/* Fila 3: Comentarios */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+          {/* Fila 3: Comentarios (ocupa ancho completo en pantallas amplias) */}
+          <div className="grupo" style={{ gridColumn: "1 / -1" }}>
             <label>Comentarios</label>
             <textarea
+              className="input"
               rows={4}
               value={coment}
               onChange={(e) => setComent(e.target.value)}
@@ -202,38 +218,34 @@ export default function MonitoreoAdmin() {
             />
           </div>
         </div>
-
-        {/* Fila 4: Acciones + Buscador */}
-        <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-          <button type="submit" style={{ background: "blue", color: "#fff" }} disabled={cargando}>
-            {editId ? "Actualizar" : "Guardar"}
-          </button>
-          <button type="button" onClick={limpiar} disabled={cargando}>
-            Cancelar
-          </button>
-
-          {/* Buscador a la derecha con label */}
-          <div className="grupo" style={{ marginLeft: "auto", maxWidth: 280 }}>
-            <label>Buscar</label>
-            <input
-              className="input"
-              placeholder="Por negociación, comentario o fecha…"
-              value={filtro}
-              onChange={(e) => setFiltro(e.target.value)}
-            />
-          </div>
-        </div>
       </form>
 
-      {/* TABLA (ID oculto en la maqueta visual) */}
+      {/* CABECERA / BUSCADOR */}
+      <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
+        <h3 className="titulo-seccion">Listado</h3>
+        <div className="grupo" style={{ maxWidth: 280 }}>
+          <label>Buscar</label>
+          <input
+            className="input"
+            placeholder="Por negociación, comentario o fecha…"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* TABLA */}
       <div className="tabla-contenedor">
-        <table className="tabla" style={{ width: "100%" }}>
+        <table
+          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
+          style={{ width: "100%" }}
+        >
           <thead>
             <tr>
               {/* <th style={{ width: 90 }}>ID</th>  ← oculto */}
               <th>Negociación</th>
               <th>Fecha inicio monitoreo</th>
-              <th>Comentarios</th>
+              <th className="hide-md">Comentarios</th>
               <th style={{ width: 170 }}>Acciones</th>
             </tr>
           </thead>
@@ -243,17 +255,27 @@ export default function MonitoreoAdmin() {
               return (
                 <tr key={row.id_monitoreo}>
                   {/* <td className="oculto">{row.id_monitoreo}</td> ← no se muestra */}
-                  <td>{neg?.label || row.id_negociacion}</td>
+                  <td className="td-wrap">{neg?.label || row.id_negociacion}</td>
                   <td>{row.fecha_inicio_monitoreo || "-"}</td>
-                  <td className="col-obs">{row.comentarios || "-"}</td>
+                  <td className="hide-md td-wrap col-obs">
+                    {row.comentarios || "-"}
+                  </td>
                   <td className="col-acciones">
-                    <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>
+                    <button
+                      className="btn btn-mini"
+                      onClick={() => editar(row)}
+                      disabled={cargando}
+                      aria-label="Editar monitoreo"
+                      title="Editar"
+                    >
                       Editar
                     </button>
                     <button
                       className="btn btn-mini btn-peligro"
                       onClick={() => eliminar(row)}
                       disabled={cargando}
+                      aria-label="Eliminar monitoreo"
+                      title="Eliminar"
                     >
                       Eliminar
                     </button>

@@ -113,18 +113,11 @@ export default function SindicatosAdmin() {
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
-      {/* FORMULARIO */}
-      <form
-        onSubmit={onGuardar}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          marginBottom: "15px",
-        }}
-      >
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+      {/* FORMULARIO (responsive con grid) */}
+      <form onSubmit={onGuardar} className="formulario" style={{ marginBottom: 12 }}>
+        {/* Fila 1: Nombre / Federación */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Nombre del sindicato</label>
             <input
               className="input"
@@ -133,7 +126,7 @@ export default function SindicatosAdmin() {
               onChange={(e) => setForm({ ...form, nombre_sindicato: e.target.value })}
             />
           </div>
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Federación (opcional)</label>
             <input
               className="input"
@@ -144,8 +137,9 @@ export default function SindicatosAdmin() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        {/* Fila 2: Tipo / Acciones */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Tipo de sindicato</label>
             <select
               className="input"
@@ -161,17 +155,23 @@ export default function SindicatosAdmin() {
             </select>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primario"
-            style={{ background: "blue", color: "#fff", borderColor: "blue" }}
-            disabled={cargando}
-          >
-            {editId ? "Actualizar" : "Guardar"}
-          </button>
-          <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
-            Limpiar
-          </button>
+          <div className="acciones-centro">
+            <button
+              type="submit"
+              className="btn btn-primario"
+              disabled={cargando}
+            >
+              {editId ? "Actualizar" : "Guardar"}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={limpiar}
+              disabled={cargando}
+            >
+              Limpiar
+            </button>
+          </div>
         </div>
 
         {Object.keys(errores).length > 0 && (
@@ -195,30 +195,42 @@ export default function SindicatosAdmin() {
         </div>
       </div>
 
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      {/* TABLA */}
+      <div className="tabla-contenedor">
+        <table
+          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
+          style={{ width: "100%" }}
+        >
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Federación</th>
-              <th>Tipo</th>
+              <th className="hide-md">Federación</th>
+              <th className="hide-xs">Tipo</th>
               <th style={{ width: 160 }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {sindicatosFiltrados.map((s) => (
               <tr key={s.id_sindicato}>
-                <td>{s.nombre_sindicato}</td>
-                <td>{s.federacion || "-"}</td>
-                <td>{s.tipo_sindicato || "-"}</td>
+                <td className="td-wrap">{s.nombre_sindicato}</td>
+                <td className="hide-md td-wrap">{s.federacion || "-"}</td>
+                <td className="hide-xs td-wrap">{s.tipo_sindicato || "-"}</td>
                 <td className="col-acciones">
-                  <button className="btn btn-mini" onClick={() => onEditar(s)} disabled={cargando}>
+                  <button
+                    className="btn btn-mini"
+                    onClick={() => onEditar(s)}
+                    disabled={cargando}
+                    aria-label="Editar sindicato"
+                    title="Editar"
+                  >
                     Editar
                   </button>
                   <button
                     className="btn btn-mini btn-peligro"
                     onClick={() => onEliminar(s)}
                     disabled={cargando}
+                    aria-label="Eliminar sindicato"
+                    title="Eliminar"
                   >
                     Eliminar
                   </button>

@@ -98,9 +98,7 @@ export default function NegociacionesAdmin() {
     () =>
       empresas.map((e) => ({
         id: e.id_empresa,
-        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${
-          e.nombre_empresa
-        }`,
+        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${e.nombre_empresa}`,
       })),
     [empresas]
   );
@@ -238,14 +236,11 @@ export default function NegociacionesAdmin() {
     <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <h2>🤝 Negociaciones</h2>
 
-      {/* FORMULARIO */}
-      <form
-        onSubmit={onSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "15px" }}
-      >
-        {/* Fila 1 */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+      {/* FORMULARIO (responsive con grid) */}
+      <form onSubmit={onSubmit} className="formulario" style={{ marginBottom: 12 }}>
+        {/* Fila 1: Empresa / Sindicato */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Empresa</label>
             <select
               className="input"
@@ -259,7 +254,7 @@ export default function NegociacionesAdmin() {
             </select>
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Sindicato</label>
             <select
               className="input"
@@ -274,9 +269,9 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 2 */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        {/* Fila 2: Contrato / Estado */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Contrato</label>
             <input
               className="input"
@@ -286,7 +281,7 @@ export default function NegociacionesAdmin() {
             />
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Estado</label>
             <select
               className="input"
@@ -300,9 +295,9 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 3 */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        {/* Fila 3: Fechas (3 campos) */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Inicio negociación</label>
             <input
               className="input"
@@ -313,7 +308,7 @@ export default function NegociacionesAdmin() {
             />
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Término negociación</label>
             <input
               className="input"
@@ -324,7 +319,7 @@ export default function NegociacionesAdmin() {
             />
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo" style={{ gridColumn: "1 / -1" }}>
             <label>Vigencia contrato comercial</label>
             <input
               className="input"
@@ -338,9 +333,9 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 4 */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        {/* Fila 4: Números (3 campos) */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Dotación total</label>
             <input
               className="input"
@@ -352,7 +347,7 @@ export default function NegociacionesAdmin() {
             />
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Personal sindicalizado</label>
             <input
               className="input"
@@ -366,7 +361,7 @@ export default function NegociacionesAdmin() {
             />
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>% Sindicalizado</label>
             <input
               className="input"
@@ -383,12 +378,25 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 5 */}
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button type="submit" style={{ background: "blue", color: "#fff" }} disabled={cargando}>
+        {/* Acciones */}
+        <div className="acciones-centro" style={{ marginTop: 6 }}>
+          <button
+            type="submit"
+            className="btn btn-primario"
+            disabled={cargando}
+            aria-label={editId ? "Actualizar negociación" : "Guardar negociación"}
+            title={editId ? "Actualizar negociación" : "Guardar negociación"}
+          >
             {editId ? "Actualizar" : "Guardar"}
           </button>
-          <button type="button" onClick={limpiar} disabled={cargando}>
+          <button
+            type="button"
+            className="btn"
+            onClick={limpiar}
+            disabled={cargando}
+            aria-label="Limpiar formulario"
+            title="Limpiar"
+          >
             Limpiar
           </button>
         </div>
@@ -409,14 +417,17 @@ export default function NegociacionesAdmin() {
       </div>
 
       {/* TABLA: sin columna ID y con fechas dd-mm-aaaa */}
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      <div className="tabla-contenedor">
+        <table
+          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
+          style={{ width: "100%" }}
+        >
           <thead>
             <tr>
               <th>Minera</th>
               <th>Empresa</th>
-              <th>Sindicato</th>
-              <th>Contrato</th>
+              <th className="hide-md">Sindicato</th>
+              <th className="hide-xs">Contrato</th>
               <th>Estado</th>
               <th>Inicio</th>
               <th>Término</th>
@@ -427,22 +438,30 @@ export default function NegociacionesAdmin() {
           <tbody>
             {filas.map((n) => (
               <tr key={n.id}>
-                <td>{n.minera || "-"}</td>
-                <td>{n.empresa || "-"}</td>
-                <td>{n.sindicato || "-"}</td>
-                <td>{n.contrato || "-"}</td>
+                <td className="td-wrap">{n.minera || "-"}</td>
+                <td className="td-wrap">{n.empresa || "-"}</td>
+                <td className="hide-md td-wrap">{n.sindicato || "-"}</td>
+                <td className="hide-xs td-num">{n.contrato || "-"}</td>
                 <td style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
                 <td>{formatearFecha(n.fecha_inicio)}</td>
                 <td>{formatearFecha(n.fecha_termino)}</td>
                 <td>{formatearFecha(n.vencimiento)}</td>
                 <td className="col-acciones">
-                  <button className="btn btn-mini" onClick={() => onEditar(n)} disabled={cargando}>
+                  <button
+                    className="btn btn-mini"
+                    onClick={() => onEditar(n)}
+                    disabled={cargando}
+                    aria-label="Editar negociación"
+                    title="Editar"
+                  >
                     Editar
                   </button>
                   <button
                     className="btn btn-mini btn-peligro"
                     onClick={() => onEliminar(n)}
                     disabled={cargando}
+                    aria-label="Eliminar negociación"
+                    title="Eliminar"
                   >
                     Eliminar
                   </button>

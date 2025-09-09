@@ -132,6 +132,7 @@ export default function Informes() {
         <div className="grupo">
           <label>Minera</label>
           <select
+            className="input"
             value={fMinera}
             onChange={(e) => {
               setFMinera(e.target.value);
@@ -150,6 +151,7 @@ export default function Informes() {
         <div className="grupo">
           <label>Estado</label>
           <select
+            className="input"
             value={fEstado}
             onChange={(e) => {
               setFEstado(e.target.value);
@@ -168,6 +170,7 @@ export default function Informes() {
         <div className="grupo">
           <label>RUT Empresa</label>
           <input
+            className="input"
             value={fRut}
             onChange={(e) => {
               setFRut(e.target.value);
@@ -180,6 +183,7 @@ export default function Informes() {
         <div className="grupo">
           <label>Contrato</label>
           <input
+            className="input"
             value={fContrato}
             onChange={(e) => {
               setFContrato(e.target.value);
@@ -192,6 +196,7 @@ export default function Informes() {
         <div className="grupo">
           <label>Desde</label>
           <input
+            className="input"
             type="date"
             value={fDesde}
             onChange={(e) => {
@@ -204,6 +209,7 @@ export default function Informes() {
         <div className="grupo">
           <label>Hasta</label>
           <input
+            className="input"
             type="date"
             value={fHasta}
             onChange={(e) => {
@@ -227,19 +233,19 @@ export default function Informes() {
       >
         <div>
           <strong>{total}</strong> resultados
-          <span className="nota">
-            {" "}
-            (página {pageSafe} de {maxPage})
-          </span>
+          <span className="nota"> (página {pageSafe} de {maxPage})</span>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <label className="nota">Registros</label>
+          <label className="nota" htmlFor="selPageSize">Registros</label>
           <select
+            id="selPageSize"
+            className="input"
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
+            style={{ width: 84 }}
           >
             <option>5</option>
             <option>10</option>
@@ -249,12 +255,16 @@ export default function Informes() {
           <button
             className="btn"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
+            aria-label="Página anterior"
+            title="Página anterior"
           >
             ◀
           </button>
           <button
             className="btn"
             onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
+            aria-label="Página siguiente"
+            title="Página siguiente"
           >
             ▶
           </button>
@@ -262,26 +272,29 @@ export default function Informes() {
       </div>
 
       {/* TABLA */}
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      <div className="tabla-contenedor">
+        <table
+          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
+          style={{ width: "100%" }}
+        >
           <thead>
             <tr>
               <th>Minera</th>
               <th>Empresa</th>
               <th translate="no">RUT</th>
-              <th>Contrato</th>
-              <th>Sindicato</th>
+              <th className="hide-xs">Contrato</th>
+              <th className="hide-md">Sindicato</th>
               <th>Estado</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((n) => (
               <tr key={n.id}>
-                <td>{n.minera || "-"}</td>
-                <td>{n.empresa || "-"}</td>
-                <td>{n.rut || "-"}</td>
-                <td>{n.contrato || "-"}</td>
-                <td>{n.sindicato || "-"}</td>
+                <td className="td-wrap">{n.minera || "-"}</td>
+                <td className="td-wrap">{n.empresa || "-"}</td>
+                <td className="td-num" translate="no">{n.rut || "-"}</td>
+                <td className="hide-xs td-num">{n.contrato || "-"}</td>
+                <td className="hide-md td-wrap">{n.sindicato || "-"}</td>
                 <td style={{ textTransform: "capitalize" }}>
                   {n.estado || "-"}
                 </td>

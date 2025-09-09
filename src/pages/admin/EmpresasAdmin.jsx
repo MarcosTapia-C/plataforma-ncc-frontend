@@ -178,18 +178,10 @@ export default function EmpresasAdmin() {
       <h2>🏢 Empresas Contratistas</h2>
 
       {/* FORMULARIO */}
-      <form
-        onSubmit={guardar}
-        className="formulario"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          marginBottom: "15px",
-        }}
-      >
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+      <form onSubmit={guardar} className="formulario" style={{ marginBottom: 15 }}>
+        {/* Fila: Nombre / RUT */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Nombre de la empresa</label>
             <input
               className="input"
@@ -199,7 +191,7 @@ export default function EmpresasAdmin() {
             />
           </div>
 
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>RUT Empresa</label>
             <input
               className="input"
@@ -211,8 +203,9 @@ export default function EmpresasAdmin() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        {/* Fila: Minera / Acciones */}
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Minera</label>
             <select
               className="input"
@@ -228,17 +221,24 @@ export default function EmpresasAdmin() {
             </select>
           </div>
 
-          <button
-            type="submit"
-            onClick={guardar}
-            className="btn btn-primario"
-            disabled={cargando}
-          >
-            {editando ? "Actualizar" : "Agregar"}
-          </button>
-          <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
-            Limpiar
-          </button>
+          <div className="acciones-centro" style={{ alignItems: "end" }}>
+            <button
+              type="submit"
+              onClick={guardar}
+              className="btn btn-primario"
+              disabled={cargando}
+            >
+              {editando ? "Actualizar" : "Agregar"}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={limpiar}
+              disabled={cargando}
+            >
+              Limpiar
+            </button>
+          </div>
         </div>
       </form>
 
@@ -257,29 +257,29 @@ export default function EmpresasAdmin() {
       </div>
 
       {/* TABLA */}
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      <div className="tabla-contenedor">
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
               <th style={{ width: "40%" }}>Nombre de la empresa</th>
-              <th style={{ width: "20%" }} translate="no">
-                RUT
-              </th>
-              <th style={{ width: "25%" }}>Minera</th>
+              <th style={{ width: "20%" }} translate="no">RUT</th>
+              <th className="hide-md" style={{ width: "25%" }}>Minera</th>
               <th style={{ width: "15%" }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {empresasFiltradas.map((e) => (
               <tr key={e.id_empresa}>
-                <td>{e.nombre_empresa}</td>
-                <td translate="no">{e.rut_empresa}</td>
-                <td>{e.Minera?.nombre_minera || e.id_minera}</td>
+                <td className="td-wrap">{e.nombre_empresa}</td>
+                <td className="td-num" translate="no">{e.rut_empresa}</td>
+                <td className="hide-md td-wrap">{e.Minera?.nombre_minera || e.id_minera}</td>
                 <td className="col-acciones">
                   <button
                     className="btn btn-mini"
                     onClick={() => editar(e)}
                     disabled={cargando}
+                    aria-label="Editar empresa"
+                    title="Editar"
                   >
                     ✏️
                   </button>
@@ -287,6 +287,8 @@ export default function EmpresasAdmin() {
                     className="btn btn-mini btn-peligro"
                     onClick={() => eliminar(e.id_empresa)}
                     disabled={cargando}
+                    aria-label="Eliminar empresa"
+                    title="Eliminar"
                   >
                     🗑️
                   </button>

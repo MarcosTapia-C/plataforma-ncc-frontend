@@ -3,27 +3,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
 
 export default function UsuariosAdmin() {
-  // Datos
-  const [roles, setRoles] = useState([]); // [{id_rol, nombre_rol}]
-  const [usuarios, setUsuarios] = useState([]); // [{id_usuario, ..., Rol:{...}}]
-
-  // UI / estado formulario
-  const [modo, setModo] = useState("crear"); // crear | editar
+  const [roles, setRoles] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [modo, setModo] = useState("crear");
   const [editId, setEditId] = useState(null);
   const [filtro, setFiltro] = useState("");
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({});
-
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
     email: "",
     usuario: "",
     id_rol: 2,
-    contrasena: "", // solo se envía al crear
+    contrasena: "",
   });
 
-  // --------- Cargar roles y usuarios ----------
   useEffect(() => {
     (async () => {
       try {
@@ -33,15 +28,13 @@ export default function UsuariosAdmin() {
         const rUsers = await api.get("/usuarios");
         setUsuarios(Array.isArray(rUsers.data) ? rUsers.data : []);
       } catch (e) {
-        console.error("Error cargando datos:", e);
-        alert("No fue posible cargar Usuarios/Roles. Revisa el token o la API.");
+        alert("No fue posible cargar Usuarios/Roles.");
       } finally {
         setCargando(false);
       }
     })();
   }, []);
 
-  // --------- Utilidades ----------
   const limpiar = () => {
     setForm({ nombre: "", apellido: "", email: "", usuario: "", id_rol: 2, contrasena: "" });
     setErrores({});
@@ -56,7 +49,7 @@ export default function UsuariosAdmin() {
     if (!form.email.trim()) e.email = "Requerido";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Formato inválido";
     if (!form.usuario.trim()) e.usuario = "Requerido";
-    if (modo === "crear" && !form.contrasena.trim()) e.contrasena = "Requerida (solo al crear)";
+    if (modo === "crear" && !form.contrasena.trim()) e.contrasena = "Requerida";
     if (!form.id_rol) e.id_rol = "Seleccione un rol";
     setErrores(e);
     return Object.keys(e).length === 0;
@@ -74,7 +67,6 @@ export default function UsuariosAdmin() {
     );
   }, [usuarios, filtro]);
 
-  // --------- Acciones CRUD ----------
   const recargarUsuarios = async () => {
     const r = await api.get("/usuarios");
     setUsuarios(Array.isArray(r.data) ? r.data : []);
@@ -83,7 +75,6 @@ export default function UsuariosAdmin() {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!validar()) return;
-
     try {
       setCargando(true);
       if (modo === "crear") {
@@ -107,12 +98,7 @@ export default function UsuariosAdmin() {
       await recargarUsuarios();
       limpiar();
     } catch (err) {
-      console.error("Error guardando usuario:", err?.response?.data || err);
-      const msg =
-        err?.response?.data?.mensaje ||
-        (Array.isArray(err?.response?.data?.errores) && err.response.data.errores[0]?.msg) ||
-        "Error al guardar.";
-      alert(msg);
+      alert(err?.response?.data?.mensaje || "Error al guardar.");
     } finally {
       setCargando(false);
     }
@@ -139,76 +125,61 @@ export default function UsuariosAdmin() {
       await api.delete(`/usuarios/${id}`);
       await recargarUsuarios();
       if (editId === id) limpiar();
-    } catch (err) {
-      console.error("Error eliminando usuario:", err?.response?.data || err);
-      alert(err?.response?.data?.mensaje || "Error al eliminar.");
     } finally {
       setCargando(false);
     }
   };
 
-  // --------- Render (misma estructura visual que Empresas) ----------
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>👥 Gestión de usuarios</h2>
 
       {/* FORMULARIO */}
-      <form
-        onSubmit={onSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          marginBottom: "15px",
-        }}
-      >
-        {/* Fila 1: Nombre / Apellido */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+      <form onSubmit={onSubmit} className="formulario" style={{ marginBottom: 12 }}>
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Nombre</label>
             <input
               className="input"
-              placeholder="Nombre"
               value={form.nombre}
+              placeholder="Nombre"
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
             />
           </div>
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Apellido</label>
             <input
               className="input"
-              placeholder="Apellido"
               value={form.apellido}
+              placeholder="Apellido"
               onChange={(e) => setForm({ ...form, apellido: e.target.value })}
             />
           </div>
         </div>
 
-        {/* Fila 2: Email / Usuario */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Email</label>
             <input
               className="input"
-              placeholder="correo@dominio.cl"
               value={form.email}
+              placeholder="correo@dominio.cl"
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
           </div>
-          <div className="grupo" style={{ flex: 1 }}>
+          <div className="grupo">
             <label>Usuario</label>
             <input
               className="input"
-              placeholder="usuario"
               value={form.usuario}
+              placeholder="usuario"
               onChange={(e) => setForm({ ...form, usuario: e.target.value })}
             />
           </div>
         </div>
 
-        {/* Fila 3: Rol / Contraseña (solo al crear) + Botones */}
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <div className="grupo" style={{ flex: 1 }}>
+        <div className="grid-form-2">
+          <div className="grupo">
             <label>Rol</label>
             <select
               className="input"
@@ -222,9 +193,8 @@ export default function UsuariosAdmin() {
               ))}
             </select>
           </div>
-
           {modo === "crear" && (
-            <div className="grupo" style={{ flex: 1 }}>
+            <div className="grupo">
               <label>Contraseña</label>
               <input
                 className="input"
@@ -235,7 +205,9 @@ export default function UsuariosAdmin() {
               />
             </div>
           )}
+        </div>
 
+        <div className="acciones-centro" style={{ marginTop: 6 }}>
           <button type="submit" className="btn btn-primario" disabled={cargando}>
             {modo === "crear" ? "Guardar" : "Actualizar"}
           </button>
@@ -244,7 +216,6 @@ export default function UsuariosAdmin() {
           </button>
         </div>
 
-        {/* errores mínimos debajo (opcionales) */}
         {Object.keys(errores).length > 0 && (
           <small className="nota" style={{ color: "#b91c1c" }}>
             Revisa los campos: {Object.keys(errores).join(", ")}.
@@ -252,26 +223,28 @@ export default function UsuariosAdmin() {
         )}
       </form>
 
-      {/* LISTADO (sin columna ID en la vista) */}
+      {/* LISTADO */}
       <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
         <h3 className="titulo-seccion">Datos guardados</h3>
-        <input
-          className="input"
-          style={{ maxWidth: 260 }}
-          placeholder="Buscar por nombre, usuario o email…"
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-        />
+        <div className="grupo" style={{ maxWidth: 260 }}>
+          <label>Buscar</label>
+          <input
+            className="input"
+            placeholder="Por nombre, usuario o email…"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      <div className="tabla-contenedor">
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first">
           <thead>
             <tr>
               <th>Nombre</th>
               <th>Apellido</th>
-              <th>Email</th>
-              <th>Usuario</th>
+              <th className="hide-xs">Email</th>
+              <th className="hide-md">Usuario</th>
               <th>Rol</th>
               <th style={{ width: 160 }}>Acciones</th>
             </tr>
@@ -279,10 +252,10 @@ export default function UsuariosAdmin() {
           <tbody>
             {usuariosFiltrados.map((u) => (
               <tr key={u.id_usuario}>
-                <td>{u.nombre}</td>
-                <td>{u.apellido}</td>
-                <td>{u.email}</td>
-                <td>{u.usuario}</td>
+                <td className="td-wrap">{u.nombre}</td>
+                <td className="td-wrap">{u.apellido}</td>
+                <td className="hide-xs td-wrap">{u.email}</td>
+                <td className="hide-md td-wrap">{u.usuario}</td>
                 <td>{u.Rol?.nombre_rol || rolNombre(u.id_rol)}</td>
                 <td className="col-acciones">
                   <button className="btn btn-mini" onClick={() => onEditar(u)} disabled={cargando}>
@@ -309,11 +282,7 @@ export default function UsuariosAdmin() {
         </table>
       </div>
 
-      {cargando && (
-        <small className="nota" style={{ display: "block", marginTop: 8 }}>
-          Procesando…
-        </small>
-      )}
+      {cargando && <small className="nota">Procesando…</small>}
     </div>
   );
 }

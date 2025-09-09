@@ -88,41 +88,55 @@ export default function ListaNegociaciones() {
         </div>
       </div>
 
-      <div className="tabla-responsive">
-        <table className="tabla" style={{ width: "100%" }}>
+      {/* TABLA */}
+      <div className="tabla-contenedor">
+        <table
+          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
+          style={{ width: "100%" }}
+        >
           <thead>
             <tr>
               <th>Empresa</th>
               <th translate="no">RUT</th>
-              <th>Minera</th>
-              <th>Sindicato</th>
+              <th className="hide-xs">Minera</th>
+              <th className="hide-md">Sindicato</th>
               <th>Estado</th>
               <th>Inicio</th>
               <th>Término</th>
-              <th>Dotación</th>
-              <th>Sindicalizados</th>
+              <th className="hide-md">Dotación</th>
+              <th className="hide-md">Sindicalizados</th>
               <th>% Sindicalizados</th>
             </tr>
           </thead>
           <tbody>
             {negociacionesFiltradas.map((n) => (
               <tr key={n.id_negociacion}>
-                <td>{n.Empresa?.nombre_empresa || "-"}</td>
-                <td translate="no">{n.Empresa?.rut_empresa || "-"}</td>
-                <td>{n.Empresa?.Minera?.nombre_minera || "-"}</td>
-                <td>{n.Sindicato?.nombre_sindicato || "-"}</td>
-                <td style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
+                <td className="td-wrap">{n.Empresa?.nombre_empresa || "-"}</td>
+                <td className="td-num" translate="no">
+                  {n.Empresa?.rut_empresa || "-"}
+                </td>
+                <td className="hide-xs td-wrap">
+                  {n.Empresa?.Minera?.nombre_minera || "-"}
+                </td>
+                <td className="hide-md td-wrap">
+                  {n.Sindicato?.nombre_sindicato || "-"}
+                </td>
+                <td style={{ textTransform: "capitalize" }}>
+                  {n.estado || "-"}
+                </td>
                 <td>{formatoFecha(n.fecha_inicio)}</td>
                 <td>{formatoFecha(n.fecha_termino)}</td>
-                <td>
-                  {Number.isFinite(Number(n.dotacion_total)) ? n.dotacion_total : "-"}
+                <td className="hide-md td-num">
+                  {Number.isFinite(Number(n.dotacion_total))
+                    ? n.dotacion_total
+                    : "-"}
                 </td>
-                <td>
+                <td className="hide-md td-num">
                   {Number.isFinite(Number(n.personal_sindicalizado))
                     ? n.personal_sindicalizado
                     : "-"}
                 </td>
-                <td>{formatoPorcentaje(n)}</td>
+                <td className="td-num">{formatoPorcentaje(n)}</td>
               </tr>
             ))}
             {negociacionesFiltradas.length === 0 && (

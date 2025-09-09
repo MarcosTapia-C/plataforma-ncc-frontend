@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 const TIPOS = ["Nacional", "Faena", "Interempresa"];
 
@@ -15,7 +15,6 @@ export default function SindicatosAdmin() {
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({});
 
-  // ----- Cargar -----
   const cargar = async () => {
     setCargando(true);
     try {
@@ -27,7 +26,6 @@ export default function SindicatosAdmin() {
   };
   useEffect(() => { cargar(); }, []);
 
-  // ----- Helpers -----
   const limpiar = () => {
     setForm({ nombre_sindicato: "", federacion: "", tipo_sindicato: "" });
     setErrores({});
@@ -54,15 +52,16 @@ export default function SindicatosAdmin() {
     );
   }, [sindicatos, filtro]);
 
-  // ----- CRUD -----
   const onGuardar = async (e) => {
     e.preventDefault();
     if (!validar()) return;
+
     const payload = {
       nombre_sindicato: form.nombre_sindicato.trim(),
       federacion: form.federacion.trim() || null,
       tipo_sindicato: form.tipo_sindicato || null,
     };
+
     try {
       setCargando(true);
       if (editId) {
@@ -99,13 +98,12 @@ export default function SindicatosAdmin() {
     }
   };
 
-  // ----- UI -----
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
-      {/* <<< aquí agregamos form--sm >>> */}
-      <form onSubmit={onGuardar} className="formulario form--sm" style={{ marginBottom: 12 }}>
+      <form onSubmit={onGuardar} className="formulario" style={{ marginBottom: 12 }}>
+        {/* Fila 1: Nombre / Federación */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Nombre del sindicato</label>
@@ -127,6 +125,7 @@ export default function SindicatosAdmin() {
           </div>
         </div>
 
+        {/* Fila 2: Tipo / Acciones */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Tipo de sindicato</label>
@@ -143,10 +142,10 @@ export default function SindicatosAdmin() {
           </div>
 
           <div className="acciones-centro">
-            <button type="submit" className="btn btn-primario" disabled={cargando}>
+            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
+            <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
               Limpiar
             </button>
           </div>
@@ -159,7 +158,7 @@ export default function SindicatosAdmin() {
         )}
       </form>
 
-      {/* LISTADO */}
+      {/* LISTADO + BUSCADOR */}
       <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
@@ -173,6 +172,7 @@ export default function SindicatosAdmin() {
         </div>
       </div>
 
+      {/* TABLA */}
       <div className="tabla-contenedor">
         <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
@@ -207,7 +207,8 @@ export default function SindicatosAdmin() {
           </tbody>
         </table>
       </div>
-      {cargando && <small className="nota">Procesando…</small>}
+
+      {cargando && <small className="nota" style={{ display: "block", marginTop: 8 }}>Procesando…</small>}
     </div>
   );
 }

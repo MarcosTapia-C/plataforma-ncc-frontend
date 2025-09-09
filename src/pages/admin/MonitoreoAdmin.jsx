@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
+// 🔹 estilo forzado para botón chico
+const BTN_SM = { padding: "6px 10px", fontSize: ".9rem", borderRadius: "6px", lineHeight: 1.15 };
+
 export default function MonitoreoAdmin() {
   const [negociaciones, setNegociaciones] = useState([]);
   const [items, setItems] = useState([]);
@@ -158,10 +161,10 @@ export default function MonitoreoAdmin() {
           </div>
 
           <div className="acciones-centro">
-            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
+            <button type="submit" className="btn btn-primario" style={BTN_SM} disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
+            <button type="button" className="btn" style={BTN_SM} onClick={limpiar} disabled={cargando}>
               Cancelar
             </button>
           </div>
@@ -232,11 +235,7 @@ export default function MonitoreoAdmin() {
                     <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>
                       Editar
                     </button>
-                    <button
-                      className="btn btn-mini btn-peligro"
-                      onClick={() => eliminar(row)}
-                      disabled={cargando}
-                    >
+                    <button className="btn btn-mini btn-peligro" onClick={() => eliminar(row)} disabled={cargando}>
                       Eliminar
                     </button>
                   </td>

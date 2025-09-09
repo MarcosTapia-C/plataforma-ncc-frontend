@@ -3,6 +3,9 @@ import api from "../../services/api";
 
 const TIPOS = ["Nacional", "Faena", "Interempresa"];
 
+// 🔹 estilo forzado para botón chico
+const BTN_SM = { padding: "6px 10px", fontSize: ".9rem", borderRadius: "6px", lineHeight: 1.15 };
+
 export default function SindicatosAdmin() {
   const [sindicatos, setSindicatos] = useState([]);
   const [form, setForm] = useState({
@@ -102,6 +105,7 @@ export default function SindicatosAdmin() {
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
+      {/* FORMULARIO */}
       <form onSubmit={onGuardar} className="formulario" style={{ marginBottom: 12 }}>
         {/* Fila 1: Nombre / Federación */}
         <div className="grid-form-2">
@@ -142,10 +146,10 @@ export default function SindicatosAdmin() {
           </div>
 
           <div className="acciones-centro">
-            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
+            <button type="submit" className="btn btn-primario" style={BTN_SM} disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
+            <button type="button" className="btn" style={BTN_SM} onClick={limpiar} disabled={cargando}>
               Limpiar
             </button>
           </div>

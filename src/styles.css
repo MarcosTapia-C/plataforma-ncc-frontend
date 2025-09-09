@@ -172,18 +172,60 @@ body {
 .col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 768px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .sb-logout { 
-    display: block !important;
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 100;
-    margin: 0;
+  .layout { 
+    grid-template-columns: 1fr; 
   }
-  .contenido { padding: 0 8px; }
-  .tarjeta { padding: 16px; margin: 8px; }
-  .tabla-responsive { overflow-x: auto; }
-  .tabla { min-width: 600px; }
+  
+  /* Ocultar elementos del sidebar excepto logout */
+  .sb-top, 
+  .sb-menu { 
+    display: none !important; 
+  }
+  
+  /* Reposicionar sidebar para mostrar solo logout */
+  .sidebar {
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
+    left: auto !important;
+    width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    transform: none !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Asegurar que logout sea visible */
+  .sb-logout {
+    display: block !important;
+    margin: 0 !important;
+    position: relative !important;
+    font-size: 14px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Ajustar contenido para espacio del botón */
+  .contenido { 
+    padding: 0 8px;
+    padding-top: 60px; 
+  }
+  
+  .tarjeta { 
+    padding: 16px; 
+    margin: 8px; 
+  }
+  
+  .tabla-responsive { 
+    overflow-x: auto; 
+  }
+  
+  .tabla { 
+    min-width: 600px; 
+  }
 }

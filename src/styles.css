@@ -152,6 +152,22 @@ body {
 .btn-peligro { background: #fee2e2; border-color: #fecaca; }
 .btn-mini { padding: 6px 8px; font-size: 13px; }
 
+/* Utilidades de tamaño para botones (no afectan por defecto) */
+.btn-sm {
+  padding: 6px 10px;
+  font-size: .9rem;
+  border-radius: 6px;
+  line-height: 1.15;
+}
+
+.btn-lg {
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 10px;
+  line-height: 1.15;
+}
+
+
 /* =========================
    Tablas
    ========================= */

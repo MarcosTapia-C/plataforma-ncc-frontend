@@ -99,15 +99,21 @@ export default function MinerasAdmin() {
     );
   }, [mineras, filtro]);
 
-  // ===== UI =====
   return (
-    <div className="tarjeta" style={{ maxWidth: "520px", margin: "0 auto" }}>
+    <div className="tarjeta" style={{ maxWidth: "450px", margin: "0 auto" }}>
       <h2>⛏️ Mineras</h2>
 
-      {/* FORMULARIO */}
-      <form onSubmit={onGuardar} className="formulario" style={{ marginBottom: 12 }}>
-        <div className="grid-form-2">
-          <div className="grupo">
+      <form
+        onSubmit={onGuardar}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          marginBottom: "15px",
+        }}
+      >
+        <div style={{ display: "flex", gap: "10px" }}>
+          <div className="grupo" style={{ flex: 1 }}>
             <label>Nombre de la minera</label>
             <input
               className="input"
@@ -116,46 +122,30 @@ export default function MinerasAdmin() {
               onChange={(e) => setNombre(e.target.value)}
             />
           </div>
-          <div className="acciones-centro">
-            <button
-              type="submit"
-              className="btn btn-primario"
-              disabled={cargando}
-            >
-              {editId ? "Actualizar" : "Guardar"}
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={limpiar}
-              disabled={cargando}
-            >
-              Limpiar
-            </button>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
+            {editId ? "Actualizar" : "Guardar"}
+          </button>
+          <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
+            Limpiar
+          </button>
+
+          <div className="grupo" style={{ marginLeft: "auto", maxWidth: 260 }}>
+            <label>Buscar</label>
+            <input
+              className="input"
+              placeholder="Buscar por nombre…"
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+            />
           </div>
         </div>
       </form>
 
-      {/* CABECERA / BUSCADOR */}
-      <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
-        <h3 className="titulo-seccion">Listado</h3>
-        <div className="grupo" style={{ maxWidth: 260 }}>
-          <label>Buscar</label>
-          <input
-            className="input"
-            placeholder="Buscar por nombre…"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* TABLA */}
-      <div className="tabla-contenedor">
-        <table
-          className="tabla tabla--compacta tabla--sticky-first"
-          style={{ width: "100%" }}
-        >
+      <div className="tabla-responsive">
+        <table className="tabla" style={{ width: "100%" }}>
           <thead>
             <tr>
               <th>Nombre</th>
@@ -165,14 +155,12 @@ export default function MinerasAdmin() {
           <tbody>
             {minerasFiltradas.map((m) => (
               <tr key={m.id_minera}>
-                <td className="td-wrap">{m.nombre_minera}</td>
+                <td>{m.nombre_minera}</td>
                 <td className="col-acciones">
                   <button
                     className="btn btn-mini"
                     onClick={() => onEditar(m)}
                     disabled={cargando}
-                    aria-label="Editar minera"
-                    title="Editar"
                   >
                     Editar
                   </button>
@@ -180,8 +168,6 @@ export default function MinerasAdmin() {
                     className="btn btn-mini btn-peligro"
                     onClick={() => onEliminar(m.id_minera)}
                     disabled={cargando}
-                    aria-label="Eliminar minera"
-                    title="Eliminar"
                   >
                     Eliminar
                   </button>

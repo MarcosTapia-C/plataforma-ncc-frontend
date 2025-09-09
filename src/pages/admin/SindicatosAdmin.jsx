@@ -1,6 +1,6 @@
 // src/pages/admin/SindicatosAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 const TIPOS = ["Nacional", "Faena", "Interempresa"];
 
@@ -16,11 +16,11 @@ export default function SindicatosAdmin() {
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({});
 
-  // ----- Carga inicial -----
+  // Cargar listado
   const cargar = async () => {
     setCargando(true);
     try {
-      const r = await api.get("/sindicatos"); // { ok:true, data:[...] }
+      const r = await api.get("/sindicatos");
       setSindicatos(r.data?.data || []);
     } finally {
       setCargando(false);
@@ -30,7 +30,6 @@ export default function SindicatosAdmin() {
     cargar();
   }, []);
 
-  // ----- Helpers -----
   const limpiar = () => {
     setForm({ nombre_sindicato: "", federacion: "", tipo_sindicato: "" });
     setErrores({});
@@ -40,9 +39,12 @@ export default function SindicatosAdmin() {
   const validar = () => {
     const e = {};
     const nombre = form.nombre_sindicato.trim();
-    if (nombre.length < 3) e.nombre_sindicato = "El nombre debe tener al menos 3 caracteres.";
-    if (form.federacion && form.federacion.length > 100) e.federacion = "Máx. 100 caracteres.";
-    if (form.tipo_sindicato && form.tipo_sindicato.length > 50) e.tipo_sindicato = "Máx. 50 caracteres.";
+    if (nombre.length < 3)
+      e.nombre_sindicato = "El nombre debe tener al menos 3 caracteres.";
+    if (form.federacion && form.federacion.length > 100)
+      e.federacion = "Máx. 100 caracteres.";
+    if (form.tipo_sindicato && form.tipo_sindicato.length > 50)
+      e.tipo_sindicato = "Máx. 50 caracteres.";
     setErrores(e);
     return Object.keys(e).length === 0;
   };
@@ -57,7 +59,6 @@ export default function SindicatosAdmin() {
     );
   }, [sindicatos, filtro]);
 
-  // ----- CRUD -----
   const onGuardar = async (e) => {
     e.preventDefault();
     if (!validar()) return;
@@ -77,8 +78,6 @@ export default function SindicatosAdmin() {
       }
       await cargar();
       limpiar();
-    } catch (_err) {
-      // Errores 401/409 y otros ya los maneja el interceptor en services/api.js
     } finally {
       setCargando(false);
     }
@@ -101,21 +100,17 @@ export default function SindicatosAdmin() {
       await api.delete(`/sindicatos/${s.id_sindicato}`);
       await cargar();
       if (editId === s.id_sindicato) limpiar();
-    } catch (_err) {
-      // Mensaje ya mostrado por el interceptor
     } finally {
       setCargando(false);
     }
   };
 
-  // ----- UI -----
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
-      {/* FORMULARIO (responsive con grid) */}
+      {/* FORMULARIO */}
       <form onSubmit={onGuardar} className="formulario" style={{ marginBottom: 12 }}>
-        {/* Fila 1: Nombre / Federación */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Nombre del sindicato</label>
@@ -137,7 +132,6 @@ export default function SindicatosAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Tipo / Acciones */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Tipo de sindicato</label>
@@ -156,19 +150,10 @@ export default function SindicatosAdmin() {
           </div>
 
           <div className="acciones-centro">
-            <button
-              type="submit"
-              className="btn btn-primario"
-              disabled={cargando}
-            >
+            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={limpiar}
-              disabled={cargando}
-            >
+            <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
               Limpiar
             </button>
           </div>
@@ -197,16 +182,13 @@ export default function SindicatosAdmin() {
 
       {/* TABLA */}
       <div className="tabla-contenedor">
-        <table
-          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
-          style={{ width: "100%" }}
-        >
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
               <th>Nombre</th>
               <th className="hide-md">Federación</th>
               <th className="hide-xs">Tipo</th>
-              <th>Acciones</th>
+              <th style={{ width: 160 }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -216,22 +198,10 @@ export default function SindicatosAdmin() {
                 <td className="hide-md td-wrap">{s.federacion || "-"}</td>
                 <td className="hide-xs td-wrap">{s.tipo_sindicato || "-"}</td>
                 <td className="col-acciones">
-                  <button
-                    className="btn btn-mini"
-                    onClick={() => onEditar(s)}
-                    disabled={cargando}
-                    aria-label="Editar sindicato"
-                    title="Editar"
-                  >
+                  <button className="btn btn-mini" onClick={() => onEditar(s)} disabled={cargando}>
                     Editar
                   </button>
-                  <button
-                    className="btn btn-mini btn-peligro"
-                    onClick={() => onEliminar(s)}
-                    disabled={cargando}
-                    aria-label="Eliminar sindicato"
-                    title="Eliminar"
-                  >
+                  <button className="btn btn-mini btn-peligro" onClick={() => onEliminar(s)} disabled={cargando}>
                     Eliminar
                   </button>
                 </td>

@@ -1,6 +1,6 @@
 // src/pages/Admin/MonitoreoAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../../services/api"; // <-- cliente único con baseURL `${API_URL}/api`
+import api from "../../services/api";
 
 export default function MonitoreoAdmin() {
   const [negociaciones, setNegociaciones] = useState([]);
@@ -16,17 +16,12 @@ export default function MonitoreoAdmin() {
   // buscador
   const [filtro, setFiltro] = useState("");
 
-  useEffect(() => {
-    cargarTodo();
-  }, []);
+  useEffect(() => { cargarTodo(); }, []);
 
   async function cargarTodo() {
     setCargando(true);
     try {
-      const [rNeg, rMon] = await Promise.all([
-        api.get("/negociaciones"),
-        api.get("/monitoreos"),
-      ]);
+      const [rNeg, rMon] = await Promise.all([api.get("/negociaciones"), api.get("/monitoreos")]);
       const arrNeg = Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data || [];
       const arrMon = rMon.data?.data || [];
       setNegociaciones(arrNeg);
@@ -45,8 +40,7 @@ export default function MonitoreoAdmin() {
       const minera =
         n?.Minera?.nombre_minera ||
         n?.Empresa?.Minera?.nombre_minera ||
-        n.minera ||
-        "";
+        n.minera || "";
       const empresa = n?.Empresa?.nombre_empresa || n.empresa || "";
       const contrato = n.contrato || n.num_contrato || "";
       return { id, label: [minera, empresa, contrato].filter(Boolean).join(" — ") };
@@ -72,9 +66,7 @@ export default function MonitoreoAdmin() {
         const payload = {
           id_negociacion: Number(idNeg),
           comentarios: coment,
-          ...(fecha === ""
-            ? { fecha_inicio_monitoreo: "" }
-            : { fecha_inicio_monitoreo: fecha }),
+          ...(fecha === "" ? { fecha_inicio_monitoreo: "" } : { fecha_inicio_monitoreo: fecha }),
         };
         await api.put(`/monitoreos/${editId}`, payload);
       } else {
@@ -116,10 +108,7 @@ export default function MonitoreoAdmin() {
       const st = err?.response?.status;
       const data = err?.response?.data;
       if (st === 409) {
-        alert(
-          data?.mensaje ||
-            "No se puede eliminar: existen registros dependientes asociados."
-        );
+        alert(data?.mensaje || "No se puede eliminar: existen registros dependientes asociados.");
       } else {
         const msg =
           data?.mensaje ||
@@ -147,66 +136,41 @@ export default function MonitoreoAdmin() {
     });
   }, [items, filtro, opcionesNeg]);
 
-  // ===== UI =====
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>👁️ Registro de Monitoreo</h2>
 
-      {/* FORMULARIO */}
       <form onSubmit={guardar} className="formulario" style={{ marginBottom: 12 }}>
-        {/* Fila 1: Negociación / Acciones */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Negociación</label>
-            <select
-              className="input"
-              value={idNeg}
-              onChange={(e) => setIdNeg(e.target.value)}
-            >
+            <select className="input" value={idNeg} onChange={(e) => setIdNeg(e.target.value)}>
               <option value="">Seleccionar Negociación</option>
               {opcionesNeg.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
+                <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </div>
 
           <div className="acciones-centro">
-            <button
-              type="submit"
-              className="btn btn-primario"
-              disabled={cargando}
-            >
+            <button type="submit" className="btn btn-primario btn-sm" disabled={cargando}>
               {editId ? "Actualizar" : "Guardar"}
             </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={limpiar}
-              disabled={cargando}
-            >
+            <button type="button" className="btn btn-sm" onClick={limpiar} disabled={cargando}>
               Cancelar
             </button>
           </div>
         </div>
 
-        {/* Fila 2: Fecha */}
         <div className="grid-form-2">
           <div className="grupo">
             <label>Fecha inicio monitoreo</label>
-            <input
-              className="input"
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-            />
+            <input className="input" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
             <small className="nota">
               Si dejas vacío: se usa la <b>fecha de inicio</b> de la negociación.
             </small>
           </div>
 
-          {/* Fila 3: Comentarios (ocupa ancho completo en pantallas amplias) */}
           <div className="grupo" style={{ gridColumn: "1 / -1" }}>
             <label>Comentarios</label>
             <textarea
@@ -220,7 +184,6 @@ export default function MonitoreoAdmin() {
         </div>
       </form>
 
-      {/* CABECERA / BUSCADOR */}
       <div className="cabecera-seccion" style={{ marginBottom: 8 }}>
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 280 }}>
@@ -234,19 +197,14 @@ export default function MonitoreoAdmin() {
         </div>
       </div>
 
-      {/* TABLA */}
       <div className="tabla-contenedor">
-        <table
-          className="tabla tabla--compacta tabla--ancha tabla--sticky-first"
-          style={{ width: "100%" }}
-        >
+        <table className="tabla tabla--compacta tabla--ancha tabla--sticky-first" style={{ width: "100%" }}>
           <thead>
             <tr>
-              {/* <th style={{ width: 90 }}>ID</th>  ← oculto */}
               <th>Negociación</th>
               <th>Fecha inicio monitoreo</th>
               <th className="hide-md">Comentarios</th>
-              <th>Acciones</th>
+              <th style={{ width: 170 }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -254,29 +212,14 @@ export default function MonitoreoAdmin() {
               const neg = opcionesNeg.find((n) => n.id === row.id_negociacion);
               return (
                 <tr key={row.id_monitoreo}>
-                  {/* <td className="oculto">{row.id_monitoreo}</td> ← no se muestra */}
                   <td className="td-wrap">{neg?.label || row.id_negociacion}</td>
                   <td>{row.fecha_inicio_monitoreo || "-"}</td>
-                  <td className="hide-md td-wrap col-obs">
-                    {row.comentarios || "-"}
-                  </td>
+                  <td className="hide-md td-wrap col-obs">{row.comentarios || "-"}</td>
                   <td className="col-acciones">
-                    <button
-                      className="btn btn-mini"
-                      onClick={() => editar(row)}
-                      disabled={cargando}
-                      aria-label="Editar monitoreo"
-                      title="Editar"
-                    >
+                    <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>
                       Editar
                     </button>
-                    <button
-                      className="btn btn-mini btn-peligro"
-                      onClick={() => eliminar(row)}
-                      disabled={cargando}
-                      aria-label="Eliminar monitoreo"
-                      title="Eliminar"
-                    >
+                    <button className="btn btn-mini btn-peligro" onClick={() => eliminar(row)} disabled={cargando}>
                       Eliminar
                     </button>
                   </td>
@@ -285,20 +228,14 @@ export default function MonitoreoAdmin() {
             })}
             {filtrados.length === 0 && (
               <tr>
-                <td className="sin-datos" colSpan={4}>
-                  Sin resultados
-                </td>
+                <td className="sin-datos" colSpan={4}>Sin resultados</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {cargando && (
-        <small className="nota" style={{ display: "block", marginTop: 8 }}>
-          Procesando…
-        </small>
-      )}
+      {cargando && <small className="nota" style={{ display: "block", marginTop: 8 }}>Procesando…</small>}
     </div>
   );
 }

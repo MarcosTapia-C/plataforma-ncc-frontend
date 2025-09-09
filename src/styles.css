@@ -171,3 +171,11 @@ body {
 .col-acciones { display: flex; gap: 6px; }
 .col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .contenido { padding: 0 8px; }
+  .tarjeta { padding: 16px; margin: 8px; }
+  .tabla-responsive { overflow-x: auto; }
+  .tabla { min-width: 600px; }
+}

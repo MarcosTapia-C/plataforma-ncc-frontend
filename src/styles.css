@@ -34,7 +34,7 @@ body {
   border: 1px solid var(--borde);
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0,0,0,.08);
-  padding: 16px; /* Reducido para móvil */
+  padding: 16px;
 }
 @media (min-width: 768px) {
   .tarjeta { padding: 28px; }
@@ -77,6 +77,35 @@ body {
   padding: 8px;
 }
 
+.sidebar {
+  background: var(--menu);
+  border-right: 1px solid var(--borde);
+  display: flex; 
+  flex-direction: column;
+  gap: 10px; 
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sb-top { padding: 10px; border-radius: 8px; }
+
+.sb-menu { display: flex; flex-direction: column; gap: 6px; }
+.sb-item {
+  padding: 10px; border-radius: 8px; cursor: pointer; user-select: none;
+  text-align: left; background: transparent; border: none; font: inherit;
+}
+.sb-item:hover { background: #e7e7e7; }
+
+.sb-logout {
+  margin-top: auto; padding: 10px;
+  border: 1px solid var(--borde); border-radius: 8px;
+  background: #fff; cursor: pointer;
+}
+.sb-logout:hover { background: #f6f6f6; }
+
+/* Media queries para móvil */
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
@@ -117,34 +146,11 @@ body {
   }
 }
 
-.sidebar {
-  background: var(--menu);
-  border-right: 1px solid var(--borde);
-  display: flex; flex-direction: column;
-  gap: 10px; padding: 12px;
-}
-
-.sb-top { padding: 10px; border-radius: 8px; }
-
-.sb-menu { display: flex; flex-direction: column; gap: 6px; }
-.sb-item {
-  padding: 10px; border-radius: 8px; cursor: pointer; user-select: none;
-  text-align: left; background: transparent; border: none; font: inherit;
-}
-.sb-item:hover { background: #e7e7e7; }
-
-.sb-logout {
-  margin-top: auto; padding: 10px;
-  border: 1px solid var(--borde); border-radius: 8px;
-  background: #fff; cursor: pointer;
-}
-.sb-logout:hover { background: #f6f6f6; }
-
 /* === Contenido principal === */
 .contenido {
   background: var(--fondo);
   display: block;
-  padding: 0 8px; /* Menos padding en móvil */
+  padding: 0 8px;
 }
 @media (min-width: 768px) {
   .contenido {
@@ -239,7 +245,7 @@ body {
 .btn {
   border: 1px solid rgba(0,0,0,.2);
   background: #fff;
-  padding: 10px 16px; /* Más padding para móvil */
+  padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
@@ -270,12 +276,12 @@ body {
   width: 100%;
   border-collapse: collapse;
   table-layout: auto;
-  min-width: 500px; /* Mínimo para scroll horizontal */
+  min-width: 500px;
 }
 
 .tabla th, .tabla td {
   border-bottom: 1px solid #e2e8f0;
-  padding: 8px 6px; /* Menos padding en móvil */
+  padding: 8px 6px;
   text-align: left;
   vertical-align: top;
   font-size: 14px;

@@ -1,4 +1,3 @@
-// src/pages/Admin/MonitoreoAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
@@ -8,7 +7,7 @@ export default function MonitoreoAdmin() {
 
   // form
   const [idNeg, setIdNeg] = useState("");
-  const [fecha, setFecha] = useState("");
+  const [fecha, setFecha] = useState("");     // OBLIGATORIA
   const [coment, setComent] = useState("");
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -58,26 +57,37 @@ export default function MonitoreoAdmin() {
     setComent("");
   }
 
-  async function guardar(e) {
-    e.preventDefault();
+  function validar() {
     if (!idNeg) {
       alert("Selecciona una negociación.");
-      return;
+      return false;
     }
+    if (!fecha) {
+      alert("La fecha de inicio de la negociación es obligatoria.");
+      return false;
+    }
+    return true;
+  }
+
+  async function guardar(e) {
+    e.preventDefault();
+    if (!validar()) return;
+
     setCargando(true);
     try {
       if (editId) {
         const payload = {
           id_negociacion: Number(idNeg),
           comentarios: coment,
-          ...(fecha === ""
-            ? { fecha_inicio_monitoreo: "" }
-            : { fecha_inicio_monitoreo: fecha }),
+          fecha_inicio_monitoreo: fecha, // obligatorio
         };
         await api.put(`/monitoreos/${editId}`, payload);
       } else {
-        const payload = { id_negociacion: Number(idNeg), comentarios: coment };
-        if (fecha) payload.fecha_inicio_monitoreo = fecha;
+        const payload = {
+          id_negociacion: Number(idNeg),
+          comentarios: coment,
+          fecha_inicio_monitoreo: fecha, // obligatorio
+        };
         await api.post("/monitoreos", payload);
       }
       await cargarTodo();
@@ -113,19 +123,12 @@ export default function MonitoreoAdmin() {
     } catch (err) {
       const st = err?.response?.status;
       const data = err?.response?.data;
-      if (st === 409) {
-        alert(
-          data?.mensaje ||
-            "No se puede eliminar: existen registros dependientes asociados."
-        );
-      } else {
-        const msg =
-          data?.mensaje ||
-          (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-          data?.error ||
-          "Error de API al eliminar.";
-        alert(msg);
-      }
+      const msg =
+        data?.mensaje ||
+        (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
+        data?.error ||
+        "Error de API al eliminar.";
+      alert(msg);
       console.warn("DELETE /monitoreos/:id falló →", st, data || err);
     } finally {
       setCargando(false);
@@ -170,19 +173,17 @@ export default function MonitoreoAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Fecha */}
+        {/* Fila 2: Fecha (OBLIGATORIA) */}
         <div className="form-row">
           <div className="grupo">
-            <label>Fecha inicio monitoreo</label>
+            <label>Fecha de inicio de la Negociación</label>
             <input
               className="input"
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
+              required
             />
-            <small className="nota">
-              Si dejas vacío: se usa la <b>fecha de inicio</b> de la negociación.
-            </small>
           </div>
         </div>
 

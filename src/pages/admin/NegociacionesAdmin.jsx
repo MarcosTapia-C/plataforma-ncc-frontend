@@ -2,6 +2,34 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
+/** Helpers de fecha */
+function addMonthsStr(yyyy_mm_dd, m) {
+  if (!yyyy_mm_dd) return "";
+  const d = new Date(yyyy_mm_dd);
+  if (isNaN(d)) return "";
+  d.setMonth(d.getMonth() + m);
+  const iso = d.toISOString();
+  return iso.slice(0, 10);
+}
+function monthsDiff(inicio, fin) {
+  if (!inicio || !fin) return null;
+  const a = new Date(inicio);
+  const b = new Date(fin);
+  if (isNaN(a) || isNaN(b)) return null;
+  const years = b.getFullYear() - a.getFullYear();
+  const months = b.getMonth() - a.getMonth();
+  const days = b.getDate() - a.getDate();
+  let total = years * 12 + months;
+  if (days < 0) total -= 1;
+  return total;
+}
+function capitalizarEstado(s) {
+  if (!s) return s;
+  const t = String(s).trim().toLowerCase();
+  if (!t) return t;
+  return t[0].toUpperCase() + t.slice(1);
+}
+
 /** Normaliza una negociación del backend a una fila plana para la tabla */
 function normalizarNeg(n) {
   const id = n.id_negociacion ?? n.id ?? Math.random().toString(36).slice(2);
@@ -93,14 +121,23 @@ export default function NegociacionesAdmin() {
     })();
   }, []);
 
+  // Autocompletar término cuando el admin define inicio y estado "cerrada"
+  useEffect(() => {
+    if (!form.fecha_inicio) return;
+    if ((form.estado || "").toLowerCase() !== "cerrada") return;
+    if (form.fecha_termino) return; // ya lo definió el usuario
+    const sugerido = addMonthsStr(form.fecha_inicio, 36);
+    if (sugerido) {
+      setForm((f) => ({ ...f, fecha_termino: sugerido }));
+    }
+  }, [form.fecha_inicio, form.estado]);
+
   // Opciones selects
   const opcionesEmpresas = useMemo(
     () =>
       empresas.map((e) => ({
         id: e.id_empresa,
-        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${
-          e.nombre_empresa
-        }`,
+        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${e.nombre_empresa}`,
       })),
     [empresas]
   );
@@ -169,6 +206,18 @@ export default function NegociacionesAdmin() {
       alert("El campo Contrato es obligatorio.");
       return false;
     }
+    // Validación de 36 meses máximo si hay ambas fechas
+    if (form.fecha_inicio && form.fecha_termino) {
+      const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
+      if (m !== null && m > 36) {
+        alert("La vigencia del contrato colectivo no puede exceder 36 meses.");
+        return false;
+      }
+      if (new Date(form.fecha_termino) < new Date(form.fecha_inicio)) {
+        alert("La fecha de término no puede ser anterior a la fecha de inicio.");
+        return false;
+      }
+    }
     if (form.dotacion_total !== "" && Number(form.dotacion_total) < 0) {
       alert("Dotación total debe ser ≥ 0.");
       return false;
@@ -195,7 +244,8 @@ export default function NegociacionesAdmin() {
       id_empresa: Number(form.id_empresa),
       id_sindicato: Number(form.id_sindicato),
       contrato: form.contrato.trim(),
-      estado: form.estado || undefined,
+      // El backend espera "Cerrada/En proceso/En pausa" capitalizado
+      estado: capitalizarEstado(form.estado) || undefined,
       fecha_inicio: form.fecha_inicio || undefined,
       fecha_termino: form.fecha_termino || undefined,
       vencimiento_contrato_comercial: form.vencimiento_contrato_comercial || undefined,
@@ -220,7 +270,7 @@ export default function NegociacionesAdmin() {
     }
   };
 
-  // Filtro tabla
+  // Filtro tabla (puedes buscar por todo aunque la tabla muestre menos columnas)
   const filas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return items;
@@ -270,7 +320,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Contrato / Estado */}
+        {/* Fila 2: Contrato */}
         <div className="form-row">
           <div className="grupo">
             <label>Contrato</label>
@@ -281,8 +331,39 @@ export default function NegociacionesAdmin() {
               onChange={(e) => setForm({ ...form, contrato: e.target.value })}
             />
           </div>
+        </div>
+
+        {/* Fila 3: Fechas contrato colectivo */}
+        <div className="form-row">
           <div className="grupo">
-            <label>Estado</label>
+            <label>Fecha inicio C. Colectivo</label>
+            <input
+              className="input"
+              type="date"
+              value={form.fecha_inicio}
+              onChange={(e) => setForm({ ...form, fecha_inicio: e.target.value })}
+            />
+          </div>
+          <div className="grupo">
+            <label>F. término C. Colectivo</label>
+            <input
+              className="input"
+              type="date"
+              value={form.fecha_termino}
+              onChange={(e) => setForm({ ...form, fecha_termino: e.target.value })}
+            />
+            {!!form.fecha_inicio && !!form.fecha_termino && (
+              <small className="nota">
+                Vigencia: {monthsDiff(form.fecha_inicio, form.fecha_termino) ?? "-"} meses (máx. 36)
+              </small>
+            )}
+          </div>
+        </div>
+
+        {/* Fila 4: Estado nueva negociación (debajo de fechas) */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Estado de la nueva negociación</label>
             <select
               className="input"
               value={form.estado}
@@ -292,32 +373,15 @@ export default function NegociacionesAdmin() {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
+            {form.estado.toLowerCase() === "cerrada" && (
+              <small className="nota">
+                Si defines <b>Fecha inicio C. Colectivo</b> y dejas vacío <b>F. término</b>, se autocompleta a <b>+36 meses</b>.
+              </small>
+            )}
           </div>
         </div>
 
-        {/* Fila 3: Fechas */}
-        <div className="form-row">
-          <div className="grupo">
-            <label>Inicio negociación</label>
-            <input
-              className="input"
-              type="date"
-              value={form.fecha_inicio}
-              onChange={(e) => setForm({ ...form, fecha_inicio: e.target.value })}
-            />
-          </div>
-          <div className="grupo">
-            <label>Término negociación</label>
-            <input
-              className="input"
-              type="date"
-              value={form.fecha_termino}
-              onChange={(e) => setForm({ ...form, fecha_termino: e.target.value })}
-            />
-          </div>
-        </div>
-
-        {/* Fila 4: Vencimiento contrato */}
+        {/* Fila 5: Vigencia contrato comercial */}
         <div className="form-row">
           <div className="grupo">
             <label>Vigencia contrato comercial</label>
@@ -332,7 +396,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 5: Datos numéricos */}
+        {/* Fila 6: Datos numéricos */}
         <div className="form-row">
           <div className="grupo">
             <label>Dotación total</label>
@@ -360,7 +424,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 6: Porcentaje */}
+        {/* Fila 7: Porcentaje */}
         <div className="form-row">
           <div className="grupo">
             <label>% Sindicalizado</label>
@@ -404,7 +468,7 @@ export default function NegociacionesAdmin() {
         </div>
       </div>
 
-      {/* TABLA */}
+      {/* TABLA (listado simplificado) */}
       <div className="tabla-responsive">
         <table className="tabla">
           <thead>
@@ -413,10 +477,6 @@ export default function NegociacionesAdmin() {
               <th>Empresa</th>
               <th>Sindicato</th>
               <th>Contrato</th>
-              <th className="hide-mobile">Estado</th>
-              <th className="hide-mobile">Inicio</th>
-              <th className="hide-mobile">Término</th>
-              <th className="hide-mobile">Vencimiento</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -427,10 +487,6 @@ export default function NegociacionesAdmin() {
                 <td>{n.empresa || "-"}</td>
                 <td>{n.sindicato || "-"}</td>
                 <td>{n.contrato || "-"}</td>
-                <td className="hide-mobile" style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
-                <td className="hide-mobile">{formatearFecha(n.fecha_inicio)}</td>
-                <td className="hide-mobile">{formatearFecha(n.fecha_termino)}</td>
-                <td className="hide-mobile">{formatearFecha(n.vencimiento)}</td>
                 <td className="col-acciones">
                   <button className="btn btn-mini" onClick={() => onEditar(n)} disabled={cargando}>
                     Editar
@@ -447,7 +503,7 @@ export default function NegociacionesAdmin() {
             ))}
             {filas.length === 0 && (
               <tr>
-                <td className="sin-datos" colSpan={9}>
+                <td className="sin-datos" colSpan={5}>
                   Sin resultados
                 </td>
               </tr>

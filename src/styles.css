@@ -229,3 +229,15 @@ body {
     min-width: 600px; 
   }
 }
+
+/* Badges simples para vigencia */
+.badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #e2e8f0; /* gris claro */
+}
+.badge-aviso { background: #fff7ed; border: 1px solid #fed7aa; }   /* naranja suave (<= 90 días) */
+.badge-peligro { background: #fee2e2; border: 1px solid #fecaca; } /* rojo suave (<= 30 días) */

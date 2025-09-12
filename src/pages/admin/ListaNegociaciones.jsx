@@ -70,7 +70,7 @@ export default function ListaNegociaciones() {
   }, [negociaciones, filtro]);
 
   return (
-    <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+    <div className="tarjeta" style={{ maxWidth: "1400px", margin: "0 auto" }}>
       <h2>📑 Lista de Negociaciones</h2>
 
       {/* Cabecera con buscador */}
@@ -95,12 +95,12 @@ export default function ListaNegociaciones() {
               <th className="hide-mobile" translate="no">RUT</th>
               <th>Minera</th>
               <th>Sindicato</th>
-              <th className="hide-mobile">Estado</th>
-              <th className="hide-mobile">Inicio</th>
-              <th className="hide-mobile">Término</th>
+              <th className="hide-mobile">Fecha inicio C. Colectivo</th>
+              <th className="hide-mobile">F. término C. Colectivo</th>
               <th className="hide-mobile">Dotación</th>
               <th className="hide-mobile">Sindicalizados</th>
               <th className="hide-mobile">% Sindicalizados</th>
+              <th className="hide-mobile">Estado nueva negociación</th>
             </tr>
           </thead>
           <tbody>
@@ -110,7 +110,6 @@ export default function ListaNegociaciones() {
                 <td className="hide-mobile" translate="no">{n.Empresa?.rut_empresa || "-"}</td>
                 <td>{n.Empresa?.Minera?.nombre_minera || "-"}</td>
                 <td>{n.Sindicato?.nombre_sindicato || "-"}</td>
-                <td className="hide-mobile" style={{ textTransform: "capitalize" }}>{n.estado || "-"}</td>
                 <td className="hide-mobile">{formatoFecha(n.fecha_inicio)}</td>
                 <td className="hide-mobile">{formatoFecha(n.fecha_termino)}</td>
                 <td className="hide-mobile">
@@ -122,6 +121,9 @@ export default function ListaNegociaciones() {
                     : "-"}
                 </td>
                 <td className="hide-mobile">{formatoPorcentaje(n)}</td>
+                <td className="hide-mobile" style={{ textTransform: "capitalize" }}>
+                  {n.estado || "-"}
+                </td>
               </tr>
             ))}
             {negociacionesFiltradas.length === 0 && (

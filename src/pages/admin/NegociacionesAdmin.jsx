@@ -378,11 +378,7 @@ export default function NegociacionesAdmin() {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            {form.estado.toLowerCase() === "cerrada" && (
-              <small className="nota">
-                Si defines <b>Fecha inicio C. Colectivo</b> y dejas vacío <b>F. término</b>, se autocompleta a <b>+36 meses</b>.
-              </small>
-            )}
+           
           </div>
         </div>
 

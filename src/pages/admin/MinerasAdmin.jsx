@@ -130,18 +130,18 @@ export default function MinerasAdmin() {
       </form>
 
       {/* CABECERA + BUSCADOR */}
-      <div className="cabecera-seccion">
-        <h3 className="titulo-seccion">Listado</h3>
-        <div className="grupo" style={{ maxWidth: 260 }}>
-          <label>Buscar</label>
-          <input
-            className="input"
-            placeholder="Buscar por nombre…"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          />
-        </div>
-      </div>
+   <div className="cabecera-seccion" style={{ display: "grid", rowGap: 8 }}>
+  <h3 className="titulo-seccion" style={{ margin: 0 }}>Listado</h3>
+  <div className="grupo" style={{ maxWidth: 260 }}>
+    <label>Buscar</label>
+    <input
+      className="input"
+      placeholder="Buscar por nombre…"
+      value={filtro}
+      onChange={(e) => setFiltro(e.target.value)}
+    />
+  </div>
+</div>
 
       {/* TABLA */}
       <div className="tabla-responsive">

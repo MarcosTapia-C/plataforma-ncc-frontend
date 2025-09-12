@@ -273,14 +273,14 @@ export default function EmpresasAdmin() {
                     onClick={() => editar(e)}
                     disabled={cargando}
                   >
-                    ✏️
+                    Editar
                   </button>
                   <button
                     className="btn btn-mini btn-peligro"
                     onClick={() => eliminar(e.id_empresa)}
                     disabled={cargando}
                   >
-                    🗑️
+                    Eliminar
                   </button>
                 </td>
               </tr>

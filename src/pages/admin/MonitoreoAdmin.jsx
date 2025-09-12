@@ -1,3 +1,4 @@
+// src/pages/admin/MonitoreoAdmin.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
@@ -7,7 +8,7 @@ export default function MonitoreoAdmin() {
 
   // form
   const [idNeg, setIdNeg] = useState("");
-  const [fecha, setFecha] = useState("");     // OBLIGATORIA
+  const [fecha, setFecha] = useState("");
   const [coment, setComent] = useState("");
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -57,37 +58,26 @@ export default function MonitoreoAdmin() {
     setComent("");
   }
 
-  function validar() {
-    if (!idNeg) {
-      alert("Selecciona una negociación.");
-      return false;
-    }
-    if (!fecha) {
-      alert("La fecha de inicio de la negociación es obligatoria.");
-      return false;
-    }
-    return true;
-  }
-
   async function guardar(e) {
     e.preventDefault();
-    if (!validar()) return;
-
+    if (!idNeg) {
+      alert("Selecciona una negociación.");
+      return;
+    }
+    if (!fecha) {
+      alert("Debes ingresar la fecha de inicio de la negociación.");
+      return;
+    }
     setCargando(true);
     try {
+      const payload = {
+        id_negociacion: Number(idNeg),
+        fecha_inicio_monitoreo: fecha,
+        comentarios: coment.trim() || null,
+      };
       if (editId) {
-        const payload = {
-          id_negociacion: Number(idNeg),
-          comentarios: coment,
-          fecha_inicio_monitoreo: fecha, // obligatorio
-        };
         await api.put(`/monitoreos/${editId}`, payload);
       } else {
-        const payload = {
-          id_negociacion: Number(idNeg),
-          comentarios: coment,
-          fecha_inicio_monitoreo: fecha, // obligatorio
-        };
         await api.post("/monitoreos", payload);
       }
       await cargarTodo();
@@ -123,16 +113,34 @@ export default function MonitoreoAdmin() {
     } catch (err) {
       const st = err?.response?.status;
       const data = err?.response?.data;
-      const msg =
-        data?.mensaje ||
-        (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
-        data?.error ||
-        "Error de API al eliminar.";
-      alert(msg);
+      if (st === 409) {
+        alert(
+          data?.mensaje ||
+            "No se puede eliminar: existen registros dependientes asociados."
+        );
+      } else {
+        const msg =
+          data?.mensaje ||
+          (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
+          data?.error ||
+          "Error de API al eliminar.";
+        alert(msg);
+      }
       console.warn("DELETE /monitoreos/:id falló →", st, data || err);
     } finally {
       setCargando(false);
     }
+  }
+
+  // helper para mostrar fechas en formato dd-mm-aaaa
+  function formatoFecha(valor) {
+    if (!valor) return "-";
+    const f = new Date(valor);
+    if (isNaN(f)) return valor;
+    const d = String(f.getDate()).padStart(2, "0");
+    const m = String(f.getMonth() + 1).padStart(2, "0");
+    const y = f.getFullYear();
+    return `${d}-${m}-${y}`;
   }
 
   const filtrados = useMemo(() => {
@@ -158,9 +166,9 @@ export default function MonitoreoAdmin() {
         <div className="form-row">
           <div className="grupo">
             <label>Negociación</label>
-            <select 
+            <select
               className="input"
-              value={idNeg} 
+              value={idNeg}
               onChange={(e) => setIdNeg(e.target.value)}
             >
               <option value="">Seleccionar Negociación</option>
@@ -173,7 +181,7 @@ export default function MonitoreoAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Fecha (OBLIGATORIA) */}
+        {/* Fila 2: Fecha */}
         <div className="form-row">
           <div className="grupo">
             <label>Fecha de inicio de la Negociación</label>
@@ -182,7 +190,6 @@ export default function MonitoreoAdmin() {
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
-              required
             />
           </div>
         </div>
@@ -243,7 +250,7 @@ export default function MonitoreoAdmin() {
               return (
                 <tr key={row.id_monitoreo}>
                   <td>{neg?.label || row.id_negociacion}</td>
-                  <td className="hide-mobile">{row.fecha_inicio_monitoreo || "-"}</td>
+                  <td className="hide-mobile">{formatoFecha(row.fecha_inicio_monitoreo)}</td>
                   <td className="hide-mobile col-obs">{row.comentarios || "-"}</td>
                   <td className="col-acciones">
                     <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>

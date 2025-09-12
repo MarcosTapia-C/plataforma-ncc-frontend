@@ -2,27 +2,40 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
-/** Helpers de fecha */
-function addMonthsStr(yyyy_mm_dd, m) {
-  if (!yyyy_mm_dd) return "";
-  const d = new Date(yyyy_mm_dd);
-  if (isNaN(d)) return "";
-  d.setMonth(d.getMonth() + m);
-  const iso = d.toISOString();
-  return iso.slice(0, 10);
+/* =========================
+   Helpers de fecha robustos
+   ========================= */
+function parseISO(yyyy_mm_dd) {
+  if (!yyyy_mm_dd || typeof yyyy_mm_dd !== "string") return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(yyyy_mm_dd.trim());
+  if (!m) return null;
+  const y = Number(m[1]), mo = Number(m[2]) - 1, d = Number(m[3]);
+  const dt = new Date(y, mo, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== mo || dt.getDate() !== d) return null;
+  return dt;
 }
-function monthsDiff(inicio, fin) {
-  if (!inicio || !fin) return null;
-  const a = new Date(inicio);
-  const b = new Date(fin);
-  if (isNaN(a) || isNaN(b)) return null;
-  const years = b.getFullYear() - a.getFullYear();
-  const months = b.getMonth() - a.getMonth();
-  const days = b.getDate() - a.getDate();
+
+function addMonthsStr(yyyy_mm_dd, m) {
+  const d = parseISO(yyyy_mm_dd);
+  if (!d) return "";
+  d.setMonth(d.getMonth() + m);
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const da = String(d.getDate()).padStart(2, "0");
+  return `${y}-${mo}-${da}`;
+}
+
+function monthsDiff(inicioISO, finISO) {
+  const a = parseISO(inicioISO);
+  const b = parseISO(finISO);
+  if (!a || !b) return null;
+  let years = b.getFullYear() - a.getFullYear();
+  let months = b.getMonth() - a.getMonth();
   let total = years * 12 + months;
-  if (days < 0) total -= 1;
+  if (b.getDate() < a.getDate()) total -= 1; // ajusta por día
   return total;
 }
+
 function capitalizarEstado(s) {
   if (!s) return s;
   const t = String(s).trim().toLowerCase();
@@ -63,16 +76,15 @@ function normalizarNeg(n) {
 
 const ESTADOS = ["en proceso", "en pausa", "cerrada"];
 
-/** Formateo de fecha a dd-mm-aaaa (si no hay fecha, muestra "-") */
+/** Formatea fecha a dd-mm-aaaa (si no hay fecha, muestra "-") */
 function formatearFecha(f) {
   if (!f) return "-";
-  const d = new Date(f);
-  if (isNaN(d)) return "-";
-  return d.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const d = parseISO(f);
+  if (!d) return "-";
+  const da = String(d.getDate()).padStart(2, "0");
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const y = d.getFullYear();
+  return `${da}-${mo}-${y}`;
 }
 
 export default function NegociacionesAdmin() {
@@ -120,11 +132,11 @@ export default function NegociacionesAdmin() {
     })();
   }, []);
 
-  // Autocompletar término cuando el admin define inicio y estado "cerrada"
+  // Autocompletar término a +36 meses cuando está "cerrada" y hay inicio
   useEffect(() => {
     if (!form.fecha_inicio) return;
     if ((form.estado || "").toLowerCase() !== "cerrada") return;
-    if (form.fecha_termino) return; // ya definido por el usuario
+    if (form.fecha_termino) return; // respetamos lo que ingrese el usuario
     const sugerido = addMonthsStr(form.fecha_inicio, 36);
     if (sugerido) {
       setForm((f) => ({ ...f, fecha_termino: sugerido }));
@@ -203,15 +215,19 @@ export default function NegociacionesAdmin() {
       alert("El campo Contrato es obligatorio.");
       return false;
     }
-    // 36 meses máximo si hay ambas fechas
+    // 36 meses máximo y término >= inicio
     if (form.fecha_inicio && form.fecha_termino) {
       const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
-      if (m !== null && m > 36) {
-        alert("La vigencia del contrato colectivo no puede exceder 36 meses.");
+      if (m === null) {
+        alert("Revisa el formato de fechas (YYYY-MM-DD).");
         return false;
       }
-      if (new Date(form.fecha_termino) < new Date(form.fecha_inicio)) {
+      if (m < 0) {
         alert("La fecha de término no puede ser anterior a la fecha de inicio.");
+        return false;
+      }
+      if (m > 36) {
+        alert("La vigencia del contrato colectivo no puede exceder 36 meses.");
         return false;
       }
     }
@@ -340,11 +356,12 @@ export default function NegociacionesAdmin() {
               value={form.fecha_termino}
               onChange={(e) => setForm({ ...form, fecha_termino: e.target.value })}
             />
-            {!!form.fecha_inicio && !!form.fecha_termino && (
-              <small className="nota">
-                Vigencia: {monthsDiff(form.fecha_inicio, form.fecha_termino) ?? "-"} meses (máx. 36)
-              </small>
-            )}
+            {form.fecha_inicio && form.fecha_termino && (() => {
+              const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
+              return Number.isFinite(m) && m >= 0 ? (
+                <small className="nota">Vigencia: {m} meses (máx. 36)</small>
+              ) : null;
+            })()}
           </div>
         </div>
 

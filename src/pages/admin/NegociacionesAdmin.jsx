@@ -93,7 +93,6 @@ export default function NegociacionesAdmin() {
     vencimiento_contrato_comercial: "",
     dotacion_total: "",
     personal_sindicalizado: "",
-    porcentaje_sindicalizado: "",
   });
 
   // Filtro tabla
@@ -125,7 +124,7 @@ export default function NegociacionesAdmin() {
   useEffect(() => {
     if (!form.fecha_inicio) return;
     if ((form.estado || "").toLowerCase() !== "cerrada") return;
-    if (form.fecha_termino) return; // ya lo definió el usuario
+    if (form.fecha_termino) return; // ya definido por el usuario
     const sugerido = addMonthsStr(form.fecha_inicio, 36);
     if (sugerido) {
       setForm((f) => ({ ...f, fecha_termino: sugerido }));
@@ -158,7 +157,6 @@ export default function NegociacionesAdmin() {
       vencimiento_contrato_comercial: "",
       dotacion_total: "",
       personal_sindicalizado: "",
-      porcentaje_sindicalizado: "",
     });
   };
 
@@ -175,7 +173,6 @@ export default function NegociacionesAdmin() {
       vencimiento_contrato_comercial: n.vencimiento_contrato_comercial || "",
       dotacion_total: n.dotacion_total ?? "",
       personal_sindicalizado: n.personal_sindicalizado ?? "",
-      porcentaje_sindicalizado: n.porcentaje_sindicalizado ?? "",
     });
   };
 
@@ -206,7 +203,7 @@ export default function NegociacionesAdmin() {
       alert("El campo Contrato es obligatorio.");
       return false;
     }
-    // Validación de 36 meses máximo si hay ambas fechas
+    // 36 meses máximo si hay ambas fechas
     if (form.fecha_inicio && form.fecha_termino) {
       const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
       if (m !== null && m > 36) {
@@ -226,13 +223,6 @@ export default function NegociacionesAdmin() {
       alert("Personal sindicalizado debe ser ≥ 0.");
       return false;
     }
-    if (form.porcentaje_sindicalizado !== "") {
-      const p = Number(form.porcentaje_sindicalizado);
-      if (isNaN(p) || p < 0 || p > 100) {
-        alert("Porcentaje sindicalizado debe estar entre 0 y 100.");
-        return false;
-      }
-    }
     return true;
   };
 
@@ -244,7 +234,6 @@ export default function NegociacionesAdmin() {
       id_empresa: Number(form.id_empresa),
       id_sindicato: Number(form.id_sindicato),
       contrato: form.contrato.trim(),
-      // El backend espera "Cerrada/En proceso/En pausa" capitalizado
       estado: capitalizarEstado(form.estado) || undefined,
       fecha_inicio: form.fecha_inicio || undefined,
       fecha_termino: form.fecha_termino || undefined,
@@ -252,7 +241,6 @@ export default function NegociacionesAdmin() {
     };
     if (form.dotacion_total !== "") payload.dotacion_total = Number(form.dotacion_total);
     if (form.personal_sindicalizado !== "") payload.personal_sindicalizado = Number(form.personal_sindicalizado);
-    if (form.porcentaje_sindicalizado !== "") payload.porcentaje_sindicalizado = Number(form.porcentaje_sindicalizado);
 
     setCargando(true);
     try {
@@ -270,7 +258,7 @@ export default function NegociacionesAdmin() {
     }
   };
 
-  // Filtro tabla (puedes buscar por todo aunque la tabla muestre menos columnas)
+  // Filtro tabla
   const filas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return items;
@@ -360,7 +348,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 4: Estado nueva negociación (debajo de fechas) */}
+        {/* Fila 4: Estado nueva negociación */}
         <div className="form-row">
           <div className="grupo">
             <label>Estado de la nueva negociación</label>
@@ -396,7 +384,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 6: Datos numéricos */}
+        {/* Fila 6: Datos numéricos (sin % sindicalizado) */}
         <div className="form-row">
           <div className="grupo">
             <label>Dotación total</label>
@@ -419,25 +407,6 @@ export default function NegociacionesAdmin() {
               value={form.personal_sindicalizado}
               onChange={(e) =>
                 setForm({ ...form, personal_sindicalizado: e.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        {/* Fila 7: Porcentaje */}
-        <div className="form-row">
-          <div className="grupo">
-            <label>% Sindicalizado</label>
-            <input
-              className="input"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              placeholder="% Sindicalizado"
-              value={form.porcentaje_sindicalizado}
-              onChange={(e) =>
-                setForm({ ...form, porcentaje_sindicalizado: e.target.value })
               }
             />
           </div>

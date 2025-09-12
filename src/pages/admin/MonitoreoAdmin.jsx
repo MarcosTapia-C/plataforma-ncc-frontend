@@ -157,7 +157,7 @@ export default function MonitoreoAdmin() {
   }, [items, filtro, opcionesNeg]);
 
   return (
-    <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
+    <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <h2>👁️ Registro de Monitoreo</h2>
 
       {/* FORMULARIO */}

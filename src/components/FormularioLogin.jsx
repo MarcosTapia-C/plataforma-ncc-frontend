@@ -34,12 +34,12 @@ export default function FormularioLogin({ onIngresar }) {
       <h1 className="titulo">Iniciar sesión</h1>
 
       <div className="campo">
-        <label className="etiqueta" htmlFor="identificador">Usuario o correo</label>
+        <label className="etiqueta" htmlFor="identificador">Usuario</label>
         <input
           id="identificador"
           className="input"
           type="text"
-          placeholder="Usuario o Correo"
+          placeholder="Usuario"
           value={identificador}
           onChange={(e) => setIdentificador(e.target.value)}
           autoComplete="username"

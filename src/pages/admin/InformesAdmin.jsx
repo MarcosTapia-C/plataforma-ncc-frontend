@@ -40,6 +40,13 @@ function normalizarNeg(n) {
 
 const ESTADOS = ["en proceso", "en pausa", "cerrada"];
 
+/** Helpers */
+function yearFromISO(iso) {
+  if (!iso || typeof iso !== "string") return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  return m ? Number(m[1]) : null;
+}
+
 export default function Informes() {
   const [mineras, setMineras] = useState([]);
   const [negociaciones, setNegociaciones] = useState([]);
@@ -49,8 +56,7 @@ export default function Informes() {
   const [fEstado, setFEstado] = useState("");
   const [fRut, setFRut] = useState("");
   const [fContrato, setFContrato] = useState("");
-  const [fDesde, setFDesde] = useState("");
-  const [fHasta, setFHasta] = useState("");
+  const [fAnio, setFAnio] = useState(""); // NUEVO: Negociación por Año (año de fechaTermino)
 
   const [pageSize, setPageSize] = useState(5);
   const [page, setPage] = useState(1);
@@ -78,15 +84,21 @@ export default function Informes() {
     setFEstado("");
     setFRut("");
     setFContrato("");
-    setFDesde("");
-    setFHasta("");
+    setFAnio("");
     setPage(1);
   };
 
-  const filtradas = useMemo(() => {
-    const dDesde = fDesde ? new Date(fDesde) : null;
-    const dHasta = fHasta ? new Date(fHasta) : null;
+  /** Años disponibles desde fechaTermino (orden desc) */
+  const opcionesAnios = useMemo(() => {
+    const s = new Set();
+    negociaciones.forEach((n) => {
+      const y = yearFromISO(n.fechaTermino);
+      if (y) s.add(y);
+    });
+    return Array.from(s).sort((a, b) => b - a);
+  }, [negociaciones]);
 
+  const filtradas = useMemo(() => {
     return negociaciones.filter((n) => {
       if (fMinera && n.minera !== fMinera) return false;
       if (fEstado) {
@@ -100,16 +112,15 @@ export default function Informes() {
       )
         return false;
 
-      if (dDesde || dHasta) {
-        const fecha = n.fechaInicio || n.fechaTermino || n.vencimiento;
-        if (!fecha) return false;
-        const f = new Date(fecha);
-        if (dDesde && f < dDesde) return false;
-        if (dHasta && f > dHasta) return false;
+      // Negociación por Año (año de fechaTermino)
+      if (fAnio) {
+        const y = yearFromISO(n.fechaTermino);
+        if (!y || String(y) !== String(fAnio)) return false;
       }
+
       return true;
     });
-  }, [negociaciones, fMinera, fEstado, fRut, fContrato, fDesde, fHasta]);
+  }, [negociaciones, fMinera, fEstado, fRut, fContrato, fAnio]);
 
   const total = filtradas.length;
   const maxPage = Math.max(1, Math.ceil(total / pageSize));
@@ -145,6 +156,7 @@ export default function Informes() {
               ))}
             </select>
           </div>
+
           <div className="grupo">
             <label>Estado</label>
             <select
@@ -175,7 +187,7 @@ export default function Informes() {
                 setFRut(e.target.value);
                 setPage(1);
               }}
-              placeholder="Ej: 76.543.210-9"
+              placeholder="Ejemplo: 76.543.210-9"
             />
           </div>
           <div className="grupo">
@@ -187,35 +199,31 @@ export default function Informes() {
                 setFContrato(e.target.value);
                 setPage(1);
               }}
-              placeholder="Ej: 000001"
+              placeholder="Ejemplo: 000001"
             />
           </div>
         </div>
 
+        {/* NUEVO: Negociación por Año (año de fecha_termino del C. Colectivo) */}
         <div className="form-row">
           <div className="grupo">
-            <label>Desde</label>
-            <input
+            <label>Negociación por Año</label>
+            <select
               className="input"
-              type="date"
-              value={fDesde}
+              value={fAnio}
               onChange={(e) => {
-                setFDesde(e.target.value);
+                setFAnio(e.target.value);
                 setPage(1);
               }}
-            />
-          </div>
-          <div className="grupo">
-            <label>Hasta</label>
-            <input
-              className="input"
-              type="date"
-              value={fHasta}
-              onChange={(e) => {
-                setFHasta(e.target.value);
-                setPage(1);
-              }}
-            />
+            >
+              <option value="">(todos)</option>
+              {opcionesAnios.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+            <small className="nota">
+              Se filtra por el <b>año de término</b> del contrato colectivo.
+            </small>
           </div>
         </div>
 
@@ -251,16 +259,10 @@ export default function Informes() {
             <option>20</option>
             <option>50</option>
           </select>
-          <button
-            className="btn"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
+          <button className="btn" onClick={() => setPage((p) => Math.max(1, p - 1))}>
             ◀
           </button>
-          <button
-            className="btn"
-            onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
-          >
+          <button className="btn" onClick={() => setPage((p) => Math.min(maxPage, p + 1))}>
             ▶
           </button>
         </div>

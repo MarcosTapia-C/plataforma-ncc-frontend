@@ -3,7 +3,7 @@ import "../styles/login.css";
 
 export default function Login({ onIngresoGlobal }) {
   const manejarIngresoExitoso = (usuario) => {
-    onIngresoGlobal?.(usuario); // avisa a App
+    onIngresoGlobal?.(usuario); // se notifica al componente principal
   };
 
   return (

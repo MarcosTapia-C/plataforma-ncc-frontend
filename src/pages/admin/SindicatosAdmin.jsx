@@ -16,7 +16,7 @@ export default function SindicatosAdmin() {
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({});
 
-  // ----- Carga inicial -----
+  // se realiza la carga inicial
   const cargar = async () => {
     setCargando(true);
     try {
@@ -30,7 +30,7 @@ export default function SindicatosAdmin() {
     cargar();
   }, []);
 
-  // ----- Helpers -----
+  // utilidades del formulario
   const limpiar = () => {
     setForm({ nombre_sindicato: "", federacion: "", tipo_sindicato: "" });
     setErrores({});
@@ -57,7 +57,7 @@ export default function SindicatosAdmin() {
     );
   }, [sindicatos, filtro]);
 
-  // ----- CRUD -----
+  // acciones de guardado, edición y eliminación
   const onGuardar = async (e) => {
     e.preventDefault();
     if (!validar()) return;
@@ -78,7 +78,7 @@ export default function SindicatosAdmin() {
       await cargar();
       limpiar();
     } catch (_err) {
-      // Errores ya manejados por interceptor
+      // los errores de red/servidor se manejan en el interceptor
     } finally {
       setCargando(false);
     }
@@ -102,20 +102,20 @@ export default function SindicatosAdmin() {
       await cargar();
       if (editId === s.id_sindicato) limpiar();
     } catch (_err) {
-      // Mensaje ya mostrado por el interceptor
+      // el mensaje de error se muestra desde el interceptor
     } finally {
       setCargando(false);
     }
   };
 
-  // ----- UI -----
+  // render de la vista
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>✊ Sindicatos</h2>
 
-      {/* FORMULARIO */}
+      {/* formulario */}
       <form onSubmit={onGuardar} className="formulario">
-        {/* Fila 1: Nombre / Federación */}
+        {/* fila 1: nombre y federación */}
         <div className="form-row">
           <div className="grupo">
             <label>Nombre del sindicato</label>
@@ -137,7 +137,7 @@ export default function SindicatosAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Tipo */}
+        {/* fila 2: tipo */}
         <div className="form-row">
           <div className="grupo">
             <label>Tipo de sindicato</label>
@@ -156,7 +156,7 @@ export default function SindicatosAdmin() {
           </div>
         </div>
 
-        {/* Botones */}
+        {/* botones */}
         <div className="form-actions">
           <button
             type="submit"
@@ -177,7 +177,7 @@ export default function SindicatosAdmin() {
         )}
       </form>
 
-      {/* LISTADO + BUSCADOR */}
+      {/* listado con buscador */}
       <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>

@@ -6,7 +6,7 @@ export default function MonitoreoAdmin() {
   const [negociaciones, setNegociaciones] = useState([]);
   const [items, setItems] = useState([]);
 
-  // form
+  // estado del formulario
   const [idNeg, setIdNeg] = useState("");
   const [fecha, setFecha] = useState("");
   const [coment, setComent] = useState("");
@@ -18,6 +18,7 @@ export default function MonitoreoAdmin() {
     cargarTodo();
   }, []);
 
+  // cargo negociaciones y monitoreos al iniciar
   async function cargarTodo() {
     setCargando(true);
     try {
@@ -37,6 +38,7 @@ export default function MonitoreoAdmin() {
     }
   }
 
+  // preparo las opciones del select de negociaciones
   const opcionesNeg = useMemo(() => {
     return negociaciones.map((n) => {
       const id = n.id_negociacion ?? n.id;
@@ -51,6 +53,7 @@ export default function MonitoreoAdmin() {
     });
   }, [negociaciones]);
 
+  // vuelvo el formulario a su estado inicial
   function limpiar() {
     setEditId(null);
     setIdNeg("");
@@ -58,6 +61,7 @@ export default function MonitoreoAdmin() {
     setComent("");
   }
 
+  // guardo (creo/actualizo) un registro de monitoreo
   async function guardar(e) {
     e.preventDefault();
     if (!idNeg) {
@@ -96,6 +100,7 @@ export default function MonitoreoAdmin() {
     }
   }
 
+  // cargo los datos del registro a editar
   function editar(row) {
     setEditId(row.id_monitoreo);
     setIdNeg(row.id_negociacion);
@@ -103,6 +108,7 @@ export default function MonitoreoAdmin() {
     setComent(row.comentarios || "");
   }
 
+  // elimino un registro (con confirmación)
   async function eliminar(row) {
     if (!window.confirm("¿Eliminar este monitoreo?")) return;
     setCargando(true);
@@ -132,7 +138,7 @@ export default function MonitoreoAdmin() {
     }
   }
 
-  // helper para mostrar fechas en formato dd-mm-aaaa
+  // formateo fechas a dd-mm-aaaa para mostrar
   function formatoFecha(valor) {
     if (!valor) return "-";
     const f = new Date(valor);
@@ -143,6 +149,7 @@ export default function MonitoreoAdmin() {
     return `${d}-${m}-${y}`;
   }
 
+  // filtro en memoria por texto libre
   const filtrados = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return items;
@@ -160,9 +167,9 @@ export default function MonitoreoAdmin() {
     <div className="tarjeta" style={{ maxWidth: "1400px", margin: "0 auto" }}>
       <h2>👁️ Registro de Monitoreo</h2>
 
-      {/* FORMULARIO */}
+      {/* formulario */}
       <form onSubmit={guardar} className="formulario">
-        {/* Fila 1: Negociación */}
+        {/* fila 1: negociación */}
         <div className="form-row">
           <div className="grupo">
             <label>Negociación</label>
@@ -181,7 +188,7 @@ export default function MonitoreoAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Fecha */}
+        {/* fila 2: fecha */}
         <div className="form-row">
           <div className="grupo">
             <label>Fecha de inicio de la Negociación</label>
@@ -194,7 +201,7 @@ export default function MonitoreoAdmin() {
           </div>
         </div>
 
-        {/* Fila 3: Comentarios */}
+        {/* fila 3: comentarios */}
         <div className="form-row">
           <div className="grupo">
             <label>Comentarios</label>
@@ -208,7 +215,7 @@ export default function MonitoreoAdmin() {
           </div>
         </div>
 
-        {/* Botones */}
+        {/* botones */}
         <div className="form-actions">
           <button type="submit" className="btn btn-primario" disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
@@ -219,7 +226,7 @@ export default function MonitoreoAdmin() {
         </div>
       </form>
 
-      {/* CABECERA / BUSCADOR */}
+      {/* cabecera / buscador */}
       <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 280 }}>
@@ -233,7 +240,7 @@ export default function MonitoreoAdmin() {
         </div>
       </div>
 
-      {/* TABLA */}
+      {/* tabla */}
       <div className="tabla-responsive">
         <table className="tabla">
           <thead>

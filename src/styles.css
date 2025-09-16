@@ -12,18 +12,18 @@ body {
 }
 
 /* =========================
-   Variables (tema Panel)
+   Variables del tema del Panel
    ========================= */
 :root{
-  --fondo: #EAF6FF;     /* celeste general */
-  --menu: #F0F0F0;      /* menú lateral / tarjetas */
-  --panel-top: #FFFFFF; /* bloque superior ("Administrador"/"Usuario") */
-  --texto: #000000;     /* textos */
-  --borde: #E0E0E0;     /* líneas/bordes */
+  --fondo: #EAF6FF;     /* dejo un celeste de fondo general */
+  --menu: #F0F0F0;      /* uso este color para el menú lateral y tarjetas */
+  --panel-top: #FFFFFF; /* bloque superior del panel ("Administrador"/"Usuario") */
+  --texto: #000000;     /* color base de texto */
+  --borde: #E0E0E0;     /* líneas y bordes suaves */
 }
 
 /* =========================
-   Ayudas reutilizables
+   Utilidades que reutilizo
    ========================= */
 .centro { min-height: 100svh; display: grid; place-items: center; }
 .borde  { border: 1px solid var(--borde); }
@@ -51,7 +51,7 @@ body {
 .input::placeholder { color: #A3A3A3; }
 
 /* =========================
-   Layout del Panel (sidebar)
+   Layout del Panel con sidebar
    ========================= */
 .layout {
   display: grid;
@@ -82,11 +82,11 @@ body {
 }
 .sb-logout:hover { background: #f6f6f6; }
 
-/* === Contenido principal === */
+/* === Zona de contenido principal === */
 .contenido {
   background: var(--fondo);
   display: block;
-  padding: 0 16px; /* respiración lateral */
+  padding: 0 16px; /* dejo algo de aire lateral */
 }
 .contenido > .contenedor-pagina {
   width: 100%;
@@ -95,10 +95,10 @@ body {
 }
 
 /* =========================
-   Estructura páginas admin
+   Estructura general de páginas admin
    ========================= */
 .contenedor-pagina { max-width: 1280px; margin: 24px auto; padding: 0; }
-.contenedor-pagina.ancho-xl { max-width: 1400px; } /* para tablas anchas si lo necesitas */
+.contenedor-pagina.ancho-xl { max-width: 1400px; } /* lo uso cuando la tabla es más ancha */
 
 .barra-pagina {
   display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
@@ -106,7 +106,7 @@ body {
 .titulo { margin: 0; }
 
 /* Formularios */
-.formulario .fila-form { display: grid; gap: 12px; } /* (por compatibilidad) */
+.formulario .fila-form { display: grid; gap: 12px; } /* mantengo esta clase por compatibilidad */
 @media (min-width: 720px) {
   .formulario .fila-form { grid-template-columns: repeat(3, 1fr); }
 }
@@ -115,17 +115,17 @@ body {
   width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;
 }
 
-/* Grid 2 columnas (forms) */
+/* Grid de 2 columnas para formularios */
 .grid-form-2 { display: grid; gap: 12px; }
 @media (min-width: 900px) {
   .grid-form-2 { grid-template-columns: 1fr 1fr; }
 }
 .grid-form-2 .grupo label { font-weight: 600; }
 
-/* Acciones centradas */
+/* Acciones centradas en formularios */
 .acciones-centro { display: flex; gap: 10px; justify-content: center; }
 
-/* Secciones */
+/* Secciones con título y buscador */
 .cabecera-seccion {
   display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
 }
@@ -134,7 +134,7 @@ body {
 .nota { color: #64748b; display: block; margin-top: 8px; }
 
 /* =========================
-   Botones
+   Botones (variantes básicas)
    ========================= */
 .btn {
   border: 1px solid rgba(0,0,0,.2);
@@ -153,7 +153,7 @@ body {
    Tablas
    ========================= */
 .tabla-responsive { overflow: auto; }
-.tabla-contenedor { width: 100%; overflow-x: auto; } /* usada en Monitoreo */
+.tabla-contenedor { width: 100%; overflow-x: auto; } /* la dejo para tablas muy anchas (Monitoreo) */
 .tabla {
   width: 100%;
   border-collapse: collapse;
@@ -164,7 +164,7 @@ body {
   padding: 10px 12px;
   text-align: left;
   vertical-align: top;
-  white-space: normal; /* default consistente (evita pisadas previas) */
+  white-space: normal; /* mantengo el comportamiento por defecto para evitar cortes raros */
 }
 .tabla thead th { font-weight: 600; font-size: 14px; }
 .sin-datos { text-align: center; color: #64748b; }
@@ -176,13 +176,13 @@ body {
     grid-template-columns: 1fr; 
   }
   
-  /* Ocultar elementos del sidebar excepto logout */
+  /* en móvil oculto el contenido del sidebar y dejo solo el botón de salir */
   .sb-top, 
   .sb-menu { 
     display: none !important; 
   }
   
-  /* Reposicionar sidebar para mostrar solo logout */
+  /* reposiciono el botón de salir para que siempre quede a mano */
   .sidebar {
     position: fixed !important;
     top: 10px !important;
@@ -197,7 +197,7 @@ body {
     z-index: 1000 !important;
   }
   
-  /* Asegurar que logout sea visible */
+  /* dejo estilos mínimos al botón de salir en móvil */
   .sb-logout {
     display: block !important;
     margin: 0 !important;
@@ -210,7 +210,7 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
-  /* Ajustar contenido para espacio del botón */
+  /* ajusto el padding superior para no tapar el botón */
   .contenido { 
     padding: 0 8px;
     padding-top: 60px; 
@@ -230,14 +230,14 @@ body {
   }
 }
 
-/* Badges simples para vigencia */
+/* Insignias simples para avisos de vigencia */
 .badge {
   display: inline-block;
   margin-top: 4px;
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 12px;
-  background: #e2e8f0; /* gris claro */
+  background: #e2e8f0; /* base gris */
 }
-.badge-aviso { background: #fff7ed; border: 1px solid #fed7aa; }   /* naranja suave (<= 90 días) */
-.badge-peligro { background: #fee2e2; border: 1px solid #fecaca; } /* rojo suave (<= 30 días) */
+.badge-aviso { background: #fff7ed; border: 1px solid #fed7aa; }   /* aviso (<= 90 días) */
+.badge-peligro { background: #fee2e2; border: 1px solid #fecaca; } /* alerta (<= 30 días) */

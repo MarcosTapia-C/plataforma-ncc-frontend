@@ -1,4 +1,4 @@
-/* ===== Login (móvil primero) ===== */
+/* ===== estilos de Login (mobile first) ===== */
 :root{
   --fondo: #F5F6FA;
   --tarjeta: #F0F0F0;
@@ -18,7 +18,7 @@ body{
   color: var(--texto);
 }
 
-/* Centrado vertical */
+/* centro vertical */
 .centro{
   min-height: 100svh;
   display: grid;
@@ -26,7 +26,7 @@ body{
   padding: 16px;
 }
 
-/* Tarjeta */
+/* tarjeta contenedora */
 .tarjeta{
   width: 100%;
   max-width: 380px;
@@ -37,15 +37,15 @@ body{
   padding: 24px;
 }
 
-/* Título */
+/* título */
 .titulo{
   margin: 0 0 16px 0;
   font-size: 20px;
-  font-weight: 700;          /* negro en negrita */
+  font-weight: 700;
   color: var(--texto);
 }
 
-/* Campos */
+/* campos del formulario */
 .campo{ margin-bottom: 12px; }
 .etiqueta{
   display: block;
@@ -63,14 +63,14 @@ body{
 .input::placeholder{ color: var(--placeholder); }
 .input:focus{ outline: 2px solid #cbd5e1; }
 
-/* Mensaje de error simple */
+/* mensaje de error */
 .error{
   color: #b00020;
   font-size: 13px;
   margin: 6px 0 0 0;
 }
 
-/* Botón */
+/* botón principal */
 .boton{
   width: 100%;
   padding: 10px 12px;
@@ -88,7 +88,7 @@ body{
   cursor: not-allowed;
 }
 
-/* Pie de tarjeta (links auxiliares) */
+/* pie de tarjeta (links auxiliares) */
 .pie{
   margin-top: 12px;
   font-size: 13px;

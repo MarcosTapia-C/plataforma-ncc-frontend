@@ -20,7 +20,7 @@ export default function FormularioLogin({ onIngresar }) {
     try {
       setCargando(true);
       const data = await loginServicio({ identificador, contrasena });
-      // Avisamos al padre que ingresó (y ya guardamos token en localStorage)
+      // Se avisa al componente padre que ya se inició sesión; el token quedó en localStorage
       onIngresar?.(data.usuario || { identificador });
     } catch (err) {
       setError(err.message || "No se pudo iniciar sesión.");

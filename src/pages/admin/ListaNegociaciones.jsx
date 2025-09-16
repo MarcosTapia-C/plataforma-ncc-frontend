@@ -6,7 +6,7 @@ export default function ListaNegociaciones() {
   const [negociaciones, setNegociaciones] = useState([]);
   const [cargando, setCargando] = useState(false);
 
-  // Buscador
+  // buscador
   const [filtro, setFiltro] = useState("");
 
   const cargar = async () => {
@@ -26,7 +26,7 @@ export default function ListaNegociaciones() {
     cargar();
   }, []);
 
-  // Función auxiliar para mostrar porcentaje
+  // helper para mostrar porcentaje calculado o del backend
   function formatoPorcentaje(n) {
     const pBackend = n.porcentaje_sindicalizado;
     if (typeof pBackend === "number") return `${pBackend}%`;
@@ -39,7 +39,7 @@ export default function ListaNegociaciones() {
     return "-";
   }
 
-  // Función auxiliar para mostrar fechas en dd-mm-aaaa
+  // helper para mostrar fecha en dd-mm-aaaa
   function formatoFecha(valor) {
     if (!valor) return "-";
     const fecha = new Date(valor);
@@ -50,7 +50,7 @@ export default function ListaNegociaciones() {
     return `${d}-${m}-${y}`;
   }
 
-  // Filtrado en memoria
+  // filtrado en memoria
   const negociacionesFiltradas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return negociaciones;
@@ -73,7 +73,7 @@ export default function ListaNegociaciones() {
     <div className="tarjeta" style={{ maxWidth: "1400px", margin: "0 auto" }}>
       <h2>📑 Lista de Negociaciones</h2>
 
-      {/* Cabecera con buscador */}
+      {/* cabecera con buscador */}
       <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>

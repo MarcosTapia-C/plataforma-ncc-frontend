@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
-/** Adapta distintos formatos del backend a un formato plano uniforme */
+/** adapto distintos formatos del backend a un objeto plano para la tabla */
 function normalizarNeg(n) {
   const minera =
     n.minera ||
@@ -40,7 +40,7 @@ function normalizarNeg(n) {
 
 const ESTADOS = ["en proceso", "en pausa", "cerrada"];
 
-/** Helpers */
+/** helpers de fechas */
 function yearFromISO(iso) {
   if (!iso || typeof iso !== "string") return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
@@ -52,12 +52,14 @@ export default function Informes() {
   const [negociaciones, setNegociaciones] = useState([]);
   const [cargando, setCargando] = useState(false);
 
+  // filtros
   const [fMinera, setFMinera] = useState("");
   const [fEstado, setFEstado] = useState("");
   const [fRut, setFRut] = useState("");
   const [fContrato, setFContrato] = useState("");
-  const [fAnio, setFAnio] = useState(""); // NUEVO: Negociación por Año (año de fechaTermino)
+  const [fAnio, setFAnio] = useState(""); // uso el año de fechaTermino
 
+  // paginación local
   const [pageSize, setPageSize] = useState(5);
   const [page, setPage] = useState(1);
 
@@ -65,6 +67,7 @@ export default function Informes() {
     (async () => {
       try {
         setCargando(true);
+        // cargo catálogos y datos base
         const rMin = await api.get("/mineras");
         setMineras(rMin.data?.data || []);
 
@@ -88,7 +91,7 @@ export default function Informes() {
     setPage(1);
   };
 
-  /** Años disponibles desde fechaTermino (orden desc) */
+  /** obtengo años disponibles desde fechaTermino (orden descendente) */
   const opcionesAnios = useMemo(() => {
     const s = new Set();
     negociaciones.forEach((n) => {
@@ -98,6 +101,7 @@ export default function Informes() {
     return Array.from(s).sort((a, b) => b - a);
   }, [negociaciones]);
 
+  // aplico filtros en memoria
   const filtradas = useMemo(() => {
     return negociaciones.filter((n) => {
       if (fMinera && n.minera !== fMinera) return false;
@@ -112,7 +116,7 @@ export default function Informes() {
       )
         return false;
 
-      // Negociación por Año (año de fechaTermino)
+      // filtro por año de término del contrato colectivo
       if (fAnio) {
         const y = yearFromISO(n.fechaTermino);
         if (!y || String(y) !== String(fAnio)) return false;
@@ -122,10 +126,12 @@ export default function Informes() {
     });
   }, [negociaciones, fMinera, fEstado, fRut, fContrato, fAnio]);
 
+  // cálculo de páginas
   const total = filtradas.length;
   const maxPage = Math.max(1, Math.ceil(total / pageSize));
   const pageSafe = Math.min(page, maxPage);
 
+  // filas visibles según la página actual
   const rows = useMemo(() => {
     const start = (pageSafe - 1) * pageSize;
     return filtradas.slice(start, start + pageSize);
@@ -135,7 +141,7 @@ export default function Informes() {
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>📊 Informes</h2>
 
-      {/* FILTROS */}
+      {/* filtros */}
       <form className="formulario">
         <div className="form-row">
           <div className="grupo">
@@ -204,7 +210,7 @@ export default function Informes() {
           </div>
         </div>
 
-        {/* NUEVO: Negociación por Año (año de fecha_termino del C. Colectivo) */}
+        {/* filtro por año (año de fecha_termino del C. Colectivo) */}
         <div className="form-row">
           <div className="grupo">
             <label>Negociación por Año</label>
@@ -234,7 +240,7 @@ export default function Informes() {
         </div>
       </form>
 
-      {/* CONTROLES (resultados + paginación) */}
+      {/* controles de resultado y paginación */}
       <div className="cabecera-seccion">
         <div>
           <strong>{total}</strong> resultados
@@ -268,7 +274,7 @@ export default function Informes() {
         </div>
       </div>
 
-      {/* TABLA */}
+      {/* tabla de resultados */}
       <div className="tabla-responsive">
         <table className="tabla">
           <thead>

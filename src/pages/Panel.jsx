@@ -8,9 +8,8 @@ export default function Panel({ usuario, onSalir }) {
   
   return (
     <div className="layout">
-      {/* Menú lateral */}
+      {/* bloque superior del menú lateral con información del usuario */}
       <aside className="sidebar">
-        {/* Bloque superior */}
         <div
           className="sb-top bg-top borde"
           style={{ display: "flex", alignItems: "center", gap: 8 }}
@@ -41,7 +40,7 @@ export default function Panel({ usuario, onSalir }) {
           </div>
         </div>
         
-        {/* Menú lateral */}
+        {/* menú lateral con las opciones de navegación */}
         <nav className="sb-menu">
           <button type="button" className="sb-item" onClick={() => navigate("/panel")}>
             🏠 Inicio
@@ -112,11 +111,10 @@ export default function Panel({ usuario, onSalir }) {
         </button>
       </aside>
       
-      {/* Contenido principal */}
+      {/* contenido principal donde se renderizan las páginas hijas */}
       <main className="contenido">
         <Outlet />
       </main>
     </div>
   );
 }
-

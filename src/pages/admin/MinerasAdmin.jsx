@@ -103,9 +103,9 @@ export default function MinerasAdmin() {
     <div className="tarjeta" style={{ maxWidth: "450px", margin: "0 auto" }}>
       <h2>⛏️ Mineras</h2>
 
-      {/* FORMULARIO */}
+      {/* formulario */}
       <form onSubmit={onGuardar} className="formulario">
-        {/* Fila 1: Nombre */}
+        {/* fila 1: nombre */}
         <div className="form-row">
           <div className="grupo">
             <label>Nombre de la minera</label>
@@ -118,7 +118,7 @@ export default function MinerasAdmin() {
           </div>
         </div>
 
-        {/* Botones */}
+        {/* botones */}
         <div className="form-actions">
           <button type="submit" className="btn btn-primario" disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
@@ -129,21 +129,21 @@ export default function MinerasAdmin() {
         </div>
       </form>
 
-      {/* CABECERA + BUSCADOR */}
-   <div className="cabecera-seccion" style={{ display: "grid", rowGap: 8 }}>
-  <h3 className="titulo-seccion" style={{ margin: 0 }}>Listado</h3>
-  <div className="grupo" style={{ maxWidth: 260 }}>
-    <label>Buscar</label>
-    <input
-      className="input"
-      placeholder="Buscar por nombre…"
-      value={filtro}
-      onChange={(e) => setFiltro(e.target.value)}
-    />
-  </div>
-</div>
+      {/* cabecera y buscador */}
+      <div className="cabecera-seccion" style={{ display: "grid", rowGap: 8 }}>
+        <h3 className="titulo-seccion" style={{ margin: 0 }}>Listado</h3>
+        <div className="grupo" style={{ maxWidth: 260 }}>
+          <label>Buscar</label>
+          <input
+            className="input"
+            placeholder="Buscar por nombre…"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+        </div>
+      </div>
 
-      {/* TABLA */}
+      {/* tabla */}
       <div className="tabla-responsive">
         <table className="tabla">
           <thead>

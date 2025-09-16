@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
 /* =========================
-   Helpers de fecha robustos
+   helpers de fecha (robustos)
    ========================= */
 function parseISO(yyyy_mm_dd) {
   if (!yyyy_mm_dd || typeof yyyy_mm_dd !== "string") return null;
@@ -32,7 +32,7 @@ function monthsDiff(inicioISO, finISO) {
   let years = b.getFullYear() - a.getFullYear();
   let months = b.getMonth() - a.getMonth();
   let total = years * 12 + months;
-  if (b.getDate() < a.getDate()) total -= 1; // ajusta por día
+  if (b.getDate() < a.getDate()) total -= 1; // se ajusta por día
   return total;
 }
 
@@ -43,7 +43,7 @@ function capitalizarEstado(s) {
   return t[0].toUpperCase() + t.slice(1);
 }
 
-/** Normaliza una negociación del backend a una fila plana para la tabla */
+/** se normaliza una negociación del backend a una fila plana para la tabla */
 function normalizarNeg(n) {
   const id = n.id_negociacion ?? n.id ?? Math.random().toString(36).slice(2);
   const empresa = n?.Empresa?.nombre_empresa || n.nombre_empresa || n.empresa || "";
@@ -76,7 +76,7 @@ function normalizarNeg(n) {
 
 const ESTADOS = ["en proceso", "en pausa", "cerrada"];
 
-/** Formatea fecha a dd-mm-aaaa (si no hay fecha, muestra "-") */
+/** se formatea la fecha a dd-mm-aaaa (si no hay fecha, se muestra "-") */
 function formatearFecha(f) {
   if (!f) return "-";
   const d = parseISO(f);
@@ -93,7 +93,7 @@ export default function NegociacionesAdmin() {
   const [items, setItems] = useState([]);
   const [cargando, setCargando] = useState(false);
 
-  // Formulario
+  // estado del formulario
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({
     id_empresa: "",
@@ -107,10 +107,10 @@ export default function NegociacionesAdmin() {
     personal_sindicalizado: "",
   });
 
-  // Filtro tabla
+  // filtro del listado
   const [filtro, setFiltro] = useState("");
 
-  // Carga inicial
+  // se realiza la carga inicial de datos
   useEffect(() => {
     (async () => {
       setCargando(true);
@@ -132,18 +132,18 @@ export default function NegociacionesAdmin() {
     })();
   }, []);
 
-  // Autocompletar término a +36 meses cuando está "cerrada" y hay inicio
+  // se autocompleta la fecha de término a +36 meses cuando el estado es "cerrada" y existe inicio
   useEffect(() => {
     if (!form.fecha_inicio) return;
     if ((form.estado || "").toLowerCase() !== "cerrada") return;
-    if (form.fecha_termino) return; // respetamos lo que ingrese el usuario
+    if (form.fecha_termino) return; // se respeta lo ingresado manualmente
     const sugerido = addMonthsStr(form.fecha_inicio, 36);
     if (sugerido) {
       setForm((f) => ({ ...f, fecha_termino: sugerido }));
     }
   }, [form.fecha_inicio, form.estado]);
 
-  // Opciones selects
+  // se generan opciones para los selects
   const opcionesEmpresas = useMemo(
     () =>
       empresas.map((e) => ({
@@ -215,7 +215,7 @@ export default function NegociacionesAdmin() {
       alert("El campo Contrato es obligatorio.");
       return false;
     }
-    // 36 meses máximo y término >= inicio
+    // se valida término >= inicio y un máximo de 36 meses
     if (form.fecha_inicio && form.fecha_termino) {
       const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
       if (m === null) {
@@ -274,7 +274,7 @@ export default function NegociacionesAdmin() {
     }
   };
 
-  // Filtro tabla
+  // se filtran filas de la tabla en memoria
   const filas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return items;
@@ -287,14 +287,14 @@ export default function NegociacionesAdmin() {
     );
   }, [items, filtro]);
 
-  // ====== UI ======
+  // render de la vista
   return (
     <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <h2>🤝 Negociaciones</h2>
 
-      {/* FORMULARIO */}
+      {/* formulario */}
       <form onSubmit={onSubmit} className="formulario">
-        {/* Fila 1: Empresa / Sindicato */}
+        {/* fila 1: empresa y sindicato */}
         <div className="form-row">
           <div className="grupo">
             <label>Empresa</label>
@@ -324,7 +324,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Contrato */}
+        {/* fila 2: contrato */}
         <div className="form-row">
           <div className="grupo">
             <label>Contrato</label>
@@ -337,7 +337,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 3: Fechas contrato colectivo */}
+        {/* fila 3: fechas del contrato colectivo */}
         <div className="form-row">
           <div className="grupo">
             <label>Fecha inicio C. Colectivo</label>
@@ -365,7 +365,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 4: Estado nueva negociación */}
+        {/* fila 4: estado de la negociación */}
         <div className="form-row">
           <div className="grupo">
             <label>Estado de la nueva negociación</label>
@@ -382,7 +382,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 5: Vigencia contrato comercial */}
+        {/* fila 5: vigencia del contrato comercial */}
         <div className="form-row">
           <div className="grupo">
             <label>Vigencia contrato comercial</label>
@@ -397,7 +397,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Fila 6: Datos numéricos (sin % sindicalizado) */}
+        {/* fila 6: datos numéricos (sin % sindicalizado) */}
         <div className="form-row">
           <div className="grupo">
             <label>Dotación total</label>
@@ -425,7 +425,7 @@ export default function NegociacionesAdmin() {
           </div>
         </div>
 
-        {/* Botones */}
+        {/* botones */}
         <div className="form-actions">
           <button type="submit" className="btn btn-primario" disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
@@ -436,7 +436,7 @@ export default function NegociacionesAdmin() {
         </div>
       </form>
 
-      {/* CABECERA + BUSCADOR */}
+      {/* cabecera con buscador */}
       <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
@@ -450,7 +450,7 @@ export default function NegociacionesAdmin() {
         </div>
       </div>
 
-      {/* TABLA (listado simplificado) */}
+      {/* tabla (listado simplificado) */}
       <div className="tabla-responsive">
         <table className="tabla">
           <thead>

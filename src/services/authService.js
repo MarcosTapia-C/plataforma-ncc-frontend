@@ -1,14 +1,14 @@
 import { API_URL } from "./config";
 
 export async function loginServicio({ identificador, contrasena, correo }) {
-  // Soporta llamado antiguo con 'correo'
+  // permite usar 'identificador' (usuario o correo) o el campo 'correo'
   const id = (typeof identificador === "string" && identificador.trim())
     ? identificador
     : (correo || "");
 
   const payload = {
     identificador: id,     // usuario o correo
-    password: contrasena,  // el backend compara con bcrypt
+    password: contrasena,  // el backend valida con bcrypt
   };
 
   const resp = await fetch(`${API_URL}/api/login`, {
@@ -17,6 +17,7 @@ export async function loginServicio({ identificador, contrasena, correo }) {
     body: JSON.stringify(payload),
   });
 
+  // verifico que la respuesta sea JSON
   const contentType = resp.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) {
     const texto = await resp.text();
@@ -26,15 +27,14 @@ export async function loginServicio({ identificador, contrasena, correo }) {
 
   const data = await resp.json();
 
+  // si la API responde con error o ok !== true, muestro error
   if (!resp.ok || data?.ok !== true) {
     throw new Error(data?.mensaje || "Credenciales inválidas");
   }
 
-  // Guardar token y usuario para decidir la vista por rol
+  // guardo token y usuario en localStorage para usar en el resto de la app
   if (data.token) localStorage.setItem("token_ncc", data.token);
   if (data.usuario) localStorage.setItem("usuario_ncc", JSON.stringify(data.usuario));
 
-  return data; // { ok, token, usuario }
+  return data; // estructura esperada: { ok, token, usuario }
 }
-
-

@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
-/** Helpers RUT (formato visual) */
+/** se definen helpers para el formato visual del RUT */
 function limpiarRut(v = "") {
   return v.replace(/[^\dkK]/g, "").toUpperCase();
 }
@@ -24,7 +24,7 @@ export default function EmpresasAdmin() {
   const [editando, setEditando] = useState(null);
   const [cargando, setCargando] = useState(false);
 
-  // Buscador
+  // buscador
   const [filtro, setFiltro] = useState("");
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function EmpresasAdmin() {
     }
   }
 
-  // Filtrar en memoria
+  // filtrado en memoria
   const empresasFiltradas = useMemo(() => {
     const q = filtro.trim().toLowerCase();
     if (!q) return empresas;
@@ -66,10 +66,10 @@ export default function EmpresasAdmin() {
     );
   }, [empresas, filtro]);
 
-  // ======= VALIDACIONES LOCALES =======
+  // validaciones locales
   function validaDuplicados(rutFormateado) {
     const rutCanon = limpiarRut(rutFormateado);
-    // 1) RUT único en toda la plataforma
+    // RUT único a nivel plataforma
     const rutRepetido = empresas.some(
       (e) =>
         limpiarRut(e.rut_empresa || "") === rutCanon &&
@@ -80,7 +80,7 @@ export default function EmpresasAdmin() {
       return false;
     }
 
-    // 2) Nombre único dentro de la misma minera
+    // nombre único dentro de la misma minera
     const nombreRepetidoMismaMinera = empresas.some(
       (e) =>
         (e.nombre_empresa || "").trim().toLowerCase() ===
@@ -177,9 +177,9 @@ export default function EmpresasAdmin() {
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>🏢 Empresas Contratistas</h2>
 
-      {/* FORMULARIO */}
+      {/* formulario */}
       <form onSubmit={guardar} className="formulario">
-        {/* Fila 1: Nombre / RUT */}
+        {/* fila 1: nombre y RUT */}
         <div className="form-row">
           <div className="grupo">
             <label>Nombre de la empresa</label>
@@ -202,7 +202,7 @@ export default function EmpresasAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Minera */}
+        {/* fila 2: minera */}
         <div className="form-row">
           <div className="grupo">
             <label>Minera</label>
@@ -221,7 +221,7 @@ export default function EmpresasAdmin() {
           </div>
         </div>
 
-        {/* Botones */}
+        {/* botones */}
         <div className="form-actions">
           <button
             type="submit"
@@ -236,7 +236,7 @@ export default function EmpresasAdmin() {
         </div>
       </form>
 
-      {/* Cabecera con buscador */}
+      {/* cabecera con buscador */}
       <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Listado</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>
@@ -250,7 +250,7 @@ export default function EmpresasAdmin() {
         </div>
       </div>
 
-      {/* TABLA */}
+      {/* tabla */}
       <div className="tabla-responsive">
         <table className="tabla">
           <thead>

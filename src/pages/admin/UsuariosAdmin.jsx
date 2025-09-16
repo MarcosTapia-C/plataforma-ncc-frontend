@@ -3,11 +3,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
 export default function UsuariosAdmin() {
-  // Datos
+  // datos en memoria
   const [roles, setRoles] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
 
-  // UI / estado formulario
+  // estado de la interfaz y del formulario
   const [modo, setModo] = useState("crear");
   const [editId, setEditId] = useState(null);
   const [filtro, setFiltro] = useState("");
@@ -23,7 +23,7 @@ export default function UsuariosAdmin() {
     contrasena: "",
   });
 
-  // --------- Cargar roles y usuarios ----------
+  // se cargan roles y usuarios al montar el componente
   useEffect(() => {
     (async () => {
       try {
@@ -41,7 +41,7 @@ export default function UsuariosAdmin() {
     })();
   }, []);
 
-  // --------- Utilidades ----------
+  // utilidades de formulario
   const limpiar = () => {
     setForm({ nombre: "", apellido: "", email: "", usuario: "", id_rol: 2, contrasena: "" });
     setErrores({});
@@ -74,7 +74,7 @@ export default function UsuariosAdmin() {
     );
   }, [usuarios, filtro]);
 
-  // --------- Acciones CRUD ----------
+  // acciones de creación, actualización y eliminación
   const recargarUsuarios = async () => {
     const r = await api.get("/usuarios");
     setUsuarios(Array.isArray(r.data) ? r.data : []);
@@ -147,14 +147,14 @@ export default function UsuariosAdmin() {
     }
   };
 
-  // --------- Render ----------
+  // render de la vista
   return (
     <div className="tarjeta" style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>👥 Gestión de usuarios</h2>
 
-      {/* FORMULARIO */}
+      {/* formulario */}
       <form onSubmit={onSubmit} className="formulario">
-        {/* Fila 1: Nombre / Apellido */}
+        {/* fila 1: nombre y apellido */}
         <div className="form-row">
           <div className="grupo">
             <label>Nombre</label>
@@ -176,7 +176,7 @@ export default function UsuariosAdmin() {
           </div>
         </div>
 
-        {/* Fila 2: Email / Usuario */}
+        {/* fila 2: email y usuario */}
         <div className="form-row">
           <div className="grupo">
             <label>Email</label>
@@ -198,7 +198,7 @@ export default function UsuariosAdmin() {
           </div>
         </div>
 
-        {/* Fila 3: Rol / Contraseña (solo al crear) */}
+        {/* fila 3: rol y contraseña (solo al crear) */}
         <div className="form-row">
           <div className="grupo">
             <label>Rol</label>
@@ -229,7 +229,7 @@ export default function UsuariosAdmin() {
           )}
         </div>
 
-        {/* Botones */}
+        {/* botones de acción */}
         <div className="form-actions">
           <button type="submit" className="btn btn-primario" disabled={cargando}>
             {modo === "crear" ? "Guardar" : "Actualizar"}
@@ -239,7 +239,7 @@ export default function UsuariosAdmin() {
           </button>
         </div>
 
-        {/* errores mínimos debajo */}
+        {/* resumen de errores debajo del formulario */}
         {Object.keys(errores).length > 0 && (
           <small className="nota" style={{ color: "#b91c1c" }}>
             Revisa los campos: {Object.keys(errores).join(", ")}.
@@ -247,7 +247,7 @@ export default function UsuariosAdmin() {
         )}
       </form>
 
-      {/* LISTADO */}
+      {/* listado con filtro */}
       <div className="cabecera-seccion">
         <h3 className="titulo-seccion">Datos guardados</h3>
         <div className="grupo" style={{ maxWidth: 260 }}>

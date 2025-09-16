@@ -2,12 +2,12 @@
 import axios from "axios";
 import { API_URL } from "./config";
 
-// Instancia base apuntando al backend
+// creo una instancia de axios apuntando al backend
 const api = axios.create({
   baseURL: `${API_URL}/api`,
 });
 
-// Interceptor: inyecta token en cada request
+// antes de cada request, agrego el token si lo tengo en localStorage
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token_ncc");
   if (token) {
@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor: manejo básico de errores / 401
+// manejo de respuestas: si el backend devuelve 401, cierro sesión y redirijo; en otros casos, solo informo en consola
 api.interceptors.response.use(
   (r) => r,
   (err) => {
@@ -34,7 +34,7 @@ api.interceptors.response.use(
         (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
         data?.error ||
         "Error de API.";
-      // Evito romper la app, solo informo:
+      // no detengo el flujo de la app; solo dejo el aviso
       console.warn("[API]", msg);
     }
     return Promise.reject(err);
@@ -42,5 +42,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-

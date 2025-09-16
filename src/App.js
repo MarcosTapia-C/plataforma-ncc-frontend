@@ -17,9 +17,11 @@ import MonitoreoAdmin from "./pages/admin/MonitoreoAdmin";
 import { NegociacionesProvider } from "./context/NegociacionesContext";
 
 export default function App() {
+  // estado local para token y datos básicos del usuario
   const [token, setToken] = useState(null);
   const [usuario, setUsuario] = useState(null);
 
+  // al montar, leo token/usuario desde localStorage para mantener la sesión
   useEffect(() => {
     const t = localStorage.getItem("token_ncc");
     const u = localStorage.getItem("usuario_ncc");
@@ -27,11 +29,13 @@ export default function App() {
     if (u) setUsuario(JSON.parse(u));
   }, []);
 
+  // callback que se ejecuta al iniciar sesión correctamente
   const onIngreso = (user) => {
     setToken(localStorage.getItem("token_ncc"));
     setUsuario(user || null);
   };
 
+  // cierro sesión limpiando storage y estado
   const onSalir = () => {
     localStorage.removeItem("token_ncc");
     localStorage.removeItem("usuario_ncc");
@@ -42,10 +46,11 @@ export default function App() {
   return (
     <BrowserRouter>
       {token ? (
+        // con sesión activa, muestro el panel y sus rutas internas
         <NegociacionesProvider>
           <Routes>
             <Route path="/" element={<Navigate to="/panel" replace />} />
-            {/* Panel como layout */}
+            {/* Panel funciona como layout para las páginas internas */}
             <Route path="/panel" element={<Panel usuario={usuario} onSalir={onSalir} />}>
               <Route
                 index
@@ -61,7 +66,7 @@ export default function App() {
                   </div>
                 }
               />
-              {/* Páginas Admin */}
+              {/* páginas de administración */}
               <Route path="usuarios" element={<UsuariosAdmin />} />
               <Route path="empresas" element={<EmpresasAdmin />} />
               <Route path="mineras" element={<MinerasAdmin />} />
@@ -75,6 +80,7 @@ export default function App() {
           </Routes>
         </NegociacionesProvider>
       ) : (
+        // sin sesión, solo muestro el login
         <Routes>
           <Route path="/" element={<Login onIngresoGlobal={onIngreso} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -83,3 +89,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

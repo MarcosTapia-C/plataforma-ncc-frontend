@@ -103,7 +103,7 @@ export default function Panel({ usuario, onSalir }) {
             className="sb-item"
             onClick={() => navigate("/panel/informes")}
           >
-            📊 Reportes
+            📊 Informes
           </button>
         </nav>
         <button className="sb-logout" onClick={onSalir}>

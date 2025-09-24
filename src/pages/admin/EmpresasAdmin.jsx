@@ -66,21 +66,23 @@ export default function EmpresasAdmin() {
     );
   }, [empresas, filtro]);
 
-  // validaciones locales
+  // ================== validaciones locales (ajustadas) ==================
   function validaDuplicados(rutFormateado) {
     const rutCanon = limpiarRut(rutFormateado);
-    // RUT único a nivel plataforma
-    const rutRepetido = empresas.some(
+
+    // RUT único SOLO dentro de la misma minera
+    const rutRepetidoMismaMinera = empresas.some(
       (e) =>
         limpiarRut(e.rut_empresa || "") === rutCanon &&
+        String(e.id_minera) === String(idMinera) &&
         (editando ? e.id_empresa !== editando : true)
     );
-    if (rutRepetido) {
-      alert("El RUT ya está registrado en otra empresa.");
+    if (rutRepetidoMismaMinera) {
+      alert("Ya existe una empresa con ese RUT en la misma minera.");
       return false;
     }
 
-    // nombre único dentro de la misma minera
+    // nombre único SOLO dentro de la misma minera
     const nombreRepetidoMismaMinera = empresas.some(
       (e) =>
         (e.nombre_empresa || "").trim().toLowerCase() ===
@@ -93,7 +95,7 @@ export default function EmpresasAdmin() {
       return false;
     }
 
-    return true;
+    return true; // permitir mismo RUT/nombre en otras mineras
   }
 
   async function guardar(e) {

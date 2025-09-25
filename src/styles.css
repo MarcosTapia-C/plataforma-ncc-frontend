@@ -159,14 +159,28 @@ body {
   border-collapse: collapse;
   table-layout: auto;
 }
-.tabla th, .tabla td {
+
+/* Encabezados de tablas */
+.tabla th {
   border-bottom: 1px solid #e2e8f0;
   padding: 10px 12px;
   text-align: left;
   vertical-align: top;
-  white-space: normal; /* mantengo el comportamiento por defecto para evitar cortes raros */
+  font-weight: 600;
+  font-size: 14px;   /* encabezados mantienen 14px */
+  white-space: normal;
 }
-.tabla thead th { font-weight: 600; font-size: 14px; }
+
+/* Contenido de tablas */
+.tabla td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;   /* contenido reducido */
+  white-space: normal; /* permite saltos de línea */
+}
+
 .sin-datos { text-align: center; color: #64748b; }
 .col-acciones { display: flex; gap: 6px; }
 .col-obs { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

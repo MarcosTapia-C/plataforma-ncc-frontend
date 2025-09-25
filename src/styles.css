@@ -167,18 +167,21 @@ body {
   text-align: left;
   vertical-align: top;
   font-weight: 600;
-  font-size: 14px;   /* encabezados mantienen 14px */
-  white-space: normal;
+  font-size: 14px;     /* encabezados mantienen 14px */
+  white-space: normal; /* permiten saltos de línea */
 }
 
 /* Contenido de tablas */
 .tabla td {
   border-bottom: 1px solid #e2e8f0;
-  padding: 10px 12px;
+  padding: 8px 10px;   /* un poco más compacto */
   text-align: left;
   vertical-align: top;
-  font-size: 13px;   /* contenido reducido */
-  white-space: normal; /* permite saltos de línea */
+  font-size: 13px;     /* contenido más compacto */
+  line-height: 1.25;   /* altura de línea ajustada */
+  white-space: nowrap; /* contenido en una sola línea */
+  word-break: keep-all;
+  hyphens: manual;
 }
 
 .sin-datos { text-align: center; color: #64748b; }

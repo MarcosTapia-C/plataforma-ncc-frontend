@@ -8,7 +8,7 @@ export default function MonitoreoAdmin() {
 
   // estado del formulario
   const [idNeg, setIdNeg] = useState("");
-  const [fecha, setFecha] = useState("");
+  const [fecha, setFecha] = useState(""); // 'YYYY-MM-DD'
   const [coment, setComent] = useState("");
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -27,7 +27,7 @@ export default function MonitoreoAdmin() {
         api.get("/monitoreos"),
       ]);
       const arrNeg = Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data || [];
-      const arrMon = rMon.data?.data || [];
+      const arrMon = Array.isArray(rMon.data) ? rMon.data : rMon.data?.data || [];
       setNegociaciones(arrNeg);
       setItems(arrMon);
     } catch (err) {
@@ -76,6 +76,7 @@ export default function MonitoreoAdmin() {
     try {
       const payload = {
         id_negociacion: Number(idNeg),
+        // Mantener string 'YYYY-MM-DD' para evitar desfases de huso
         fecha_inicio_monitoreo: fecha,
         comentarios: coment.trim() || null,
       };
@@ -104,7 +105,27 @@ export default function MonitoreoAdmin() {
   function editar(row) {
     setEditId(row.id_monitoreo);
     setIdNeg(row.id_negociacion);
-    setFecha(row.fecha_inicio_monitoreo || "");
+
+    // Normaliza a 'YYYY-MM-DD' para el <input type="date">
+    const raw = row.fecha_inicio_monitoreo || "";
+    // Si viene 'YYYY-MM-DD...' (DATEONLY o ISO), toma los 10 primeros
+    let soloFecha = "";
+    if (typeof raw === "string" && /^\d{4}-\d{2}-\d{2}/.test(raw)) {
+      soloFecha = raw.slice(0, 10);
+    } else {
+      // Último recurso: intentar parsear agregando T12 para evitar retroceso por UTC
+      const d = new Date(`${raw}T12:00:00`);
+      if (!isNaN(d)) {
+        const yy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        soloFecha = `${yy}-${mm}-${dd}`;
+      } else {
+        soloFecha = ""; // evita poner algo inválido en el input
+      }
+    }
+    setFecha(soloFecha);
+
     setComent(row.comentarios || "");
   }
 
@@ -138,10 +159,17 @@ export default function MonitoreoAdmin() {
     }
   }
 
-  // formateo fechas a dd-mm-aaaa para mostrar
+  // formateo fechas a dd-mm-aaaa para mostrar SIN Date si ya viene 'YYYY-MM-DD'
   function formatoFecha(valor) {
     if (!valor) return "-";
-    const f = new Date(valor);
+    if (typeof valor === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+      const [y, m, d] = valor.split("-");
+      return `${d}-${m}-${y}`;
+    }
+    // Si viene con hora, neutraliza zona horaria agregando T12
+    const f = new Date(
+      typeof valor === "string" && !valor.includes("T") ? `${valor}T12:00:00` : valor
+    );
     if (isNaN(f)) return valor;
     const d = String(f.getDate()).padStart(2, "0");
     const m = String(f.getMonth() + 1).padStart(2, "0");
@@ -257,10 +285,16 @@ export default function MonitoreoAdmin() {
               return (
                 <tr key={row.id_monitoreo}>
                   <td>{neg?.label || row.id_negociacion}</td>
-                  <td className="hide-mobile">{formatoFecha(row.fecha_inicio_monitoreo)}</td>
+                  <td className="hide-mobile">
+                    {formatoFecha(row.fecha_inicio_monitoreo)}
+                  </td>
                   <td className="hide-mobile col-obs">{row.comentarios || "-"}</td>
                   <td className="col-acciones">
-                    <button className="btn btn-mini" onClick={() => editar(row)} disabled={cargando}>
+                    <button
+                      className="btn btn-mini"
+                      onClick={() => editar(row)}
+                      disabled={cargando}
+                    >
                       Editar
                     </button>
                     <button

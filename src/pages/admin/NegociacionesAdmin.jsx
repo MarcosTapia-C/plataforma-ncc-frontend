@@ -59,7 +59,6 @@ export default function NegociacionesAdmin() {
   const [cargando, setCargando] = useState(false);
   const [filtro, setFiltro] = useState("");
 
-  // Cargar datos iniciales (negociaciones, empresas, sindicatos)
   useEffect(() => {
     cargarTodo();
   }, []);
@@ -77,7 +76,6 @@ export default function NegociacionesAdmin() {
         (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
       setItems(arrNeg.map(normalizarNeg));
 
-      // empresas
       const arrEmp =
         (Array.isArray(rEmp.data) ? rEmp.data : rEmp.data?.data) || [];
       setEmpresas(
@@ -88,7 +86,6 @@ export default function NegociacionesAdmin() {
         }))
       );
 
-      // sindicatos
       const arrSin =
         (Array.isArray(rSin.data) ? rSin.data : rSin.data?.data) || [];
       setSindicatos(
@@ -103,7 +100,7 @@ export default function NegociacionesAdmin() {
         err?.response?.data?.mensaje ||
         err?.response?.data?.error ||
         "No fue posible cargar los datos.";
-      alert(msg); // emergente superior
+      alert(msg);
       console.warn("Carga inicial falló:", err);
     } finally {
       setCargando(false);
@@ -128,13 +125,11 @@ export default function NegociacionesAdmin() {
   function onEditar(item) {
     setEditId(item.id_negociacion);
     setForm((prev) => ({
-      ...prev,      
+      ...prev,
       id_empresa: item.id_empresa || "",
       id_sindicato: item.id_sindicato || "",
       contrato: item.contrato || "",
       estado: item.estado || "",
-      // Fechas y valores numéricos se cargan bajo demanda si el detalle se consulta aparte
-      // Para no romper flujo: mantenemos vacíos si no están.
       fecha_inicio: "",
       fecha_termino: "",
       vencimiento_contrato_comercial: "",
@@ -150,7 +145,6 @@ export default function NegociacionesAdmin() {
     setCargando(true);
     try {
       await api.delete(`/negociaciones/${id}`);
-      // refrescar lista
       const rNeg = await api.get("/negociaciones");
       const arrNeg =
         (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
@@ -182,7 +176,6 @@ export default function NegociacionesAdmin() {
     return true;
   }
 
-  // === mensaje emergente superior en el catch ===
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!validar()) return;
@@ -210,7 +203,6 @@ export default function NegociacionesAdmin() {
         await api.post(`/negociaciones`, payload);
       }
 
-      // refresco lista
       const rNeg = await api.get("/negociaciones");
       const arrNeg =
         (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
@@ -220,7 +212,6 @@ export default function NegociacionesAdmin() {
       const st = err?.response?.status;
       const data = err?.response?.data;
 
-      // Caso duplicado 409 del backend
       if (
         st === 409 &&
         (data?.error === "NEGOCIACION_DUPLICADA" ||
@@ -228,10 +219,9 @@ export default function NegociacionesAdmin() {
       ) {
         alert(
           data?.mensaje ||
-            "Esta negociacion ya existe en la plataforma"
+            "Esta negociación ya existe en la plataforma."
         );
       } else {
-        // Otros errores (validaciones 400, etc.)
         const msg =
           data?.mensaje ||
           (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
@@ -247,7 +237,6 @@ export default function NegociacionesAdmin() {
     }
   };
 
-  // Listado con filtro simple
   const filtrados = useMemo(() => {
     const f = String(filtro || "").trim().toLowerCase();
     if (!f) return items;
@@ -264,21 +253,10 @@ export default function NegociacionesAdmin() {
   }, [items, filtro]);
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1 style={{ margin: "8px 0" }}>Negociaciones (Admin)</h1>
+    <div>
+      <h1>Negociaciones (Admin)</h1>
 
-      <form
-        onSubmit={onSubmit}
-        style={{
-          display: "grid",
-          gap: 8,
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          background: "#F7F7F9",
-          padding: 12,
-          borderRadius: 12,
-          marginBottom: 16,
-        }}
-      >
+      <form onSubmit={onSubmit}>
         <div>
           <label>Empresa</label>
           <select
@@ -402,7 +380,7 @@ export default function NegociacionesAdmin() {
           />
         </div>
 
-        <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
+        <div>
           <button type="submit" disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
           </button>
@@ -412,43 +390,29 @@ export default function NegociacionesAdmin() {
         </div>
       </form>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          marginBottom: 8,
-        }}
-      >
-        <input
-          placeholder="Filtrar por texto…"
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          style={{ flex: 1 }}
-        />
-        <button onClick={cargarTodo} disabled={cargando}>
-          Recargar
-        </button>
-      </div>
+      <div>
+        <div>
+          <input
+            placeholder="Filtrar por texto…"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+          <button onClick={cargarTodo} disabled={cargando}>
+            Recargar
+          </button>
+        </div>
 
-      <div style={{ overflowX: "auto" }}>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            background: "white",
-          }}
-        >
+        <table>
           <thead>
             <tr>
-              <th style={{ textAlign: "left" }}>#</th>
-              <th style={{ textAlign: "left" }}>Minera</th>
-              <th style={{ textAlign: "left" }}>Empresa</th>
-              <th style={{ textAlign: "left" }}>RUT</th>
-              <th style={{ textAlign: "left" }}>Contrato</th>
-              <th style={{ textAlign: "left" }}>Sindicato</th>
-              <th style={{ textAlign: "left" }}>Estado</th>
-              <th style={{ textAlign: "left" }}>Acciones</th>
+              <th>#</th>
+              <th>Minera</th>
+              <th>Empresa</th>
+              <th>RUT</th>
+              <th>Contrato</th>
+              <th>Sindicato</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -461,7 +425,7 @@ export default function NegociacionesAdmin() {
                 <td>{it.contrato}</td>
                 <td>{it.sindicato}</td>
                 <td>{it.estado}</td>
-                <td style={{ display: "flex", gap: 8 }}>
+                <td>
                   <button onClick={() => onEditar(it)} disabled={cargando}>
                     Editar
                   </button>
@@ -476,7 +440,7 @@ export default function NegociacionesAdmin() {
             ))}
             {filtrados.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: 12 }}>
+                <td colSpan={8} style={{ textAlign: "center" }}>
                   Sin resultados
                 </td>
               </tr>

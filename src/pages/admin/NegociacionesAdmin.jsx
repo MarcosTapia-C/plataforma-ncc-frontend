@@ -2,52 +2,104 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 
-/** Adapta distintos formatos devueltos por el backend a un formato plano uniforme */
+/* =========================
+   helpers de fecha (robustos)
+   ========================= */
+function parseISO(yyyy_mm_dd) {
+  if (!yyyy_mm_dd || typeof yyyy_mm_dd !== "string") return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(yyyy_mm_dd.trim());
+  if (!m) return null;
+  const y = Number(m[1]), mo = Number(m[2]) - 1, d = Number(m[3]);
+  const dt = new Date(y, mo, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== mo || dt.getDate() !== d) return null;
+  return dt;
+}
+
+function addMonthsStr(yyyy_mm_dd, m) {
+  const d = parseISO(yyyy_mm_dd);
+  if (!d) return "";
+  d.setMonth(d.getMonth() + m);
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const da = String(d.getDate()).padStart(2, "0");
+  return `${y}-${mo}-${da}`;
+}
+
+function monthsDiff(inicioISO, finISO) {
+  const a = parseISO(inicioISO);
+  const b = parseISO(finISO);
+  if (!a || !b) return null;
+  let years = b.getFullYear() - a.getFullYear();
+  let months = b.getMonth() - a.getMonth();
+  let total = years * 12 + months;
+  if (b.getDate() < a.getDate()) total -= 1; // se ajusta por día
+  return total;
+}
+
+function capitalizarEstado(s) {
+  if (!s) return s;
+  const t = String(s).trim().toLowerCase();
+  if (!t) return t;
+  return t[0].toUpperCase() + t.slice(1);
+}
+
+/** se normaliza una negociación del backend a una fila plana para la tabla */
 function normalizarNeg(n) {
+  const id = n.id_negociacion ?? n.id ?? Math.random().toString(36).slice(2);
+  const empresa = n?.Empresa?.nombre_empresa || n.nombre_empresa || n.empresa || "";
   const minera =
-    n?.minera ||
-    n?.nombre_minera ||
-    n?.Minera?.nombre_minera ||
     n?.Empresa?.Minera?.nombre_minera ||
+    n?.Minera?.nombre_minera ||
+    n.nombre_minera ||
+    n.minera ||
     "";
-  const empresa =
-    n?.empresa || n?.nombre_empresa || n?.Empresa?.nombre_empresa || "";
-  const rutEmpresa =
-    n?.rutEmpresa || n?.rut_empresa || n?.Empresa?.rut_empresa || "";
-  const contrato = n?.contrato || n?.codigo_contrato || n?.num_contrato || "";
-  const sindicato =
-    n?.sindicato || n?.nombre_sindicato || n?.Sindicato?.nombre_sindicato || "";
-  const estado = n?.estado || "";
-  const id = n?.id_negociacion ?? n?.id ?? null;
+  const sindicato = n?.Sindicato?.nombre_sindicato || n.nombre_sindicato || n.sindicato || "";
+  const contrato = n.contrato || n.codigo_contrato || n.num_contrato || "";
+  const estado = (n.estado || "").toLowerCase();
+  const fecha_inicio = n.fecha_inicio || n.fechaInicio || "";
+  const fecha_termino = n.fecha_termino || n.fechaTermino || "";
+  const vencimiento = n.vencimiento_contrato_comercial || n.vencimiento || "";
 
   return {
-    id_negociacion: id,
-    minera,
+    id,
     empresa,
-    rutEmpresa,
-    contrato,
+    minera,
     sindicato,
+    contrato,
     estado,
+    fecha_inicio,
+    fecha_termino,
+    vencimiento,
+    _raw: n,
   };
 }
 
-function capitalizarEstado(v) {
-  if (!v) return "";
-  const s = String(v).trim().toLowerCase();
-  if (!s) return "";
-  return s.charAt(0).toUpperCase() + s.slice(1);
+const ESTADOS = ["en proceso", "en pausa", "cerrada"];
+
+/** se formatea la fecha a dd-mm-aaaa (si no hay fecha, se muestra "-") */
+function formatearFecha(f) {
+  if (!f) return "-";
+  const d = parseISO(f);
+  if (!d) return "-";
+  const da = String(d.getDate()).padStart(2, "0");
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const y = d.getFullYear();
+  return `${da}-${mo}-${y}`;
 }
 
 export default function NegociacionesAdmin() {
-  const [items, setItems] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const [sindicatos, setSindicatos] = useState([]);
+  const [items, setItems] = useState([]);
+  const [cargando, setCargando] = useState(false);
 
+  // estado del formulario
+  const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({
     id_empresa: "",
     id_sindicato: "",
     contrato: "",
-    estado: "",
+    estado: "en proceso",
     fecha_inicio: "",
     fecha_termino: "",
     vencimiento_contrato_comercial: "",
@@ -55,126 +107,140 @@ export default function NegociacionesAdmin() {
     personal_sindicalizado: "",
   });
 
-  const [editId, setEditId] = useState(null);
-  const [cargando, setCargando] = useState(false);
+  // filtro del listado
   const [filtro, setFiltro] = useState("");
 
+  // se realiza la carga inicial de datos
   useEffect(() => {
-    cargarTodo();
+    (async () => {
+      setCargando(true);
+      try {
+        const [rEmp, rSin, rNeg] = await Promise.all([
+          api.get("/empresas"),
+          api.get("/sindicatos"),
+          api.get("/negociaciones"),
+        ]);
+        const arrEmp = rEmp.data?.data || [];
+        const arrSin = rSin.data?.data || [];
+        const arrNeg = (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
+        setEmpresas(arrEmp);
+        setSindicatos(arrSin);
+        setItems(arrNeg.map(normalizarNeg));
+      } finally {
+        setCargando(false);
+      }
+    })();
   }, []);
 
-  async function cargarTodo() {
-    setCargando(true);
-    try {
-      const [rNeg, rEmp, rSin] = await Promise.all([
-        api.get("/negociaciones"),
-        api.get("/empresas"),
-        api.get("/sindicatos"),
-      ]);
-
-      const arrNeg =
-        (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
-      setItems(arrNeg.map(normalizarNeg));
-
-      const arrEmp =
-        (Array.isArray(rEmp.data) ? rEmp.data : rEmp.data?.data) || [];
-      setEmpresas(
-        arrEmp.map((e) => ({
-          id_empresa: e?.id_empresa ?? e?.id,
-          nombre_empresa:
-            e?.nombre_empresa ?? e?.empresa ?? e?.nombre ?? "Empresa",
-        }))
-      );
-
-      const arrSin =
-        (Array.isArray(rSin.data) ? rSin.data : rSin.data?.data) || [];
-      setSindicatos(
-        arrSin.map((s) => ({
-          id_sindicato: s?.id_sindicato ?? s?.id,
-          nombre_sindicato:
-            s?.nombre_sindicato ?? s?.sindicato ?? s?.nombre ?? "Sindicato",
-        }))
-      );
-    } catch (err) {
-      const msg =
-        err?.response?.data?.mensaje ||
-        err?.response?.data?.error ||
-        "No fue posible cargar los datos.";
-      alert(msg);
-      console.warn("Carga inicial falló:", err);
-    } finally {
-      setCargando(false);
+  // se autocompleta la fecha de término a +36 meses cuando el estado es "cerrada" y existe inicio
+  useEffect(() => {
+    if (!form.fecha_inicio) return;
+    if ((form.estado || "").toLowerCase() !== "cerrada") return;
+    if (form.fecha_termino) return; // se respeta lo ingresado manualmente
+    const sugerido = addMonthsStr(form.fecha_inicio, 36);
+    if (sugerido) {
+      setForm((f) => ({ ...f, fecha_termino: sugerido }));
     }
-  }
+  }, [form.fecha_inicio, form.estado]);
 
-  function limpiar() {
+  // se generan opciones para los selects
+  const opcionesEmpresas = useMemo(
+    () =>
+      empresas.map((e) => ({
+        id: e.id_empresa,
+        label: `${e?.Minera?.nombre_minera ? e.Minera.nombre_minera + " — " : ""}${e.nombre_empresa}`,
+      })),
+    [empresas]
+  );
+  const opcionesSindicatos = useMemo(
+    () => sindicatos.map((s) => ({ id: s.id_sindicato, label: s.nombre_sindicato })),
+    [sindicatos]
+  );
+
+  const limpiar = () => {
+    setEditId(null);
     setForm({
       id_empresa: "",
       id_sindicato: "",
       contrato: "",
-      estado: "",
+      estado: "en proceso",
       fecha_inicio: "",
       fecha_termino: "",
       vencimiento_contrato_comercial: "",
       dotacion_total: "",
       personal_sindicalizado: "",
     });
-    setEditId(null);
-  }
+  };
 
-  function onEditar(item) {
-    setEditId(item.id_negociacion);
-    setForm((prev) => ({
-      ...prev,
-      id_empresa: item.id_empresa || "",
-      id_sindicato: item.id_sindicato || "",
-      contrato: item.contrato || "",
-      estado: item.estado || "",
-      fecha_inicio: "",
-      fecha_termino: "",
-      vencimiento_contrato_comercial: "",
-      dotacion_total: "",
-      personal_sindicalizado: "",
-    }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  const onEditar = (row) => {
+    const n = row._raw;
+    setEditId(n.id_negociacion);
+    setForm({
+      id_empresa: n.id_empresa || "",
+      id_sindicato: n.id_sindicato || "",
+      contrato: n.contrato || "",
+      estado: (n.estado || "en proceso").toLowerCase(),
+      fecha_inicio: n.fecha_inicio || "",
+      fecha_termino: n.fecha_termino || "",
+      vencimiento_contrato_comercial: n.vencimiento_contrato_comercial || "",
+      dotacion_total: n.dotacion_total ?? "",
+      personal_sindicalizado: n.personal_sindicalizado ?? "",
+    });
+  };
 
-  async function onEliminar(id) {
-    if (!id) return;
+  const onEliminar = async (row) => {
     if (!window.confirm("¿Eliminar esta negociación?")) return;
     setCargando(true);
     try {
-      await api.delete(`/negociaciones/${id}`);
+      await api.delete(`/negociaciones/${row.id}`);
       const rNeg = await api.get("/negociaciones");
-      const arrNeg =
-        (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
+      const arrNeg = (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
       setItems(arrNeg.map(normalizarNeg));
-    } catch (err) {
-      const msg =
-        err?.response?.data?.mensaje ||
-        err?.response?.data?.error ||
-        "No fue posible eliminar.";
-      alert(msg);
+      if (editId === row.id) limpiar();
     } finally {
       setCargando(false);
     }
-  }
+  };
 
-  function validar() {
+  const validar = () => {
     if (!form.id_empresa) {
-      alert("Selecciona la empresa.");
+      alert("Selecciona una Empresa.");
       return false;
     }
     if (!form.id_sindicato) {
-      alert("Selecciona el sindicato.");
+      alert("Selecciona un Sindicato.");
       return false;
     }
-    if (!String(form.contrato || "").trim()) {
-      alert("Ingresa el contrato.");
+    if (!String(form.contrato).trim()) {
+      alert("El campo Contrato es obligatorio.");
+      return false;
+    }
+    // se valida término >= inicio y un máximo de 36 meses
+    if (form.fecha_inicio && form.fecha_termino) {
+      const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
+      if (m === null) {
+        alert("Revisa el formato de fechas (YYYY-MM-DD).");
+        return false;
+      }
+      if (m < 0) {
+        alert("La fecha de término no puede ser anterior a la fecha de inicio.");
+        return false;
+      }
+      if (m > 36) {
+        alert("La vigencia del contrato colectivo no puede exceder 36 meses.");
+        return false;
+      }
+    }
+    if (form.dotacion_total !== "" && Number(form.dotacion_total) < 0) {
+      alert("Dotación total debe ser ≥ 0.");
+      return false;
+    }
+    if (form.personal_sindicalizado !== "" && Number(form.personal_sindicalizado) < 0) {
+      alert("Personal sindicalizado debe ser ≥ 0.");
       return false;
     }
     return true;
-  }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -183,39 +249,34 @@ export default function NegociacionesAdmin() {
     const payload = {
       id_empresa: Number(form.id_empresa),
       id_sindicato: Number(form.id_sindicato),
-      contrato: String(form.contrato || "").trim(),
+      contrato: form.contrato.trim(),
       estado: capitalizarEstado(form.estado) || undefined,
       fecha_inicio: form.fecha_inicio || undefined,
       fecha_termino: form.fecha_termino || undefined,
-      vencimiento_contrato_comercial:
-        form.vencimiento_contrato_comercial || undefined,
+      vencimiento_contrato_comercial: form.vencimiento_contrato_comercial || undefined,
     };
-    if (form.dotacion_total !== "")
-      payload.dotacion_total = Number(form.dotacion_total);
-    if (form.personal_sindicalizado !== "")
-      payload.personal_sindicalizado = Number(form.personal_sindicalizado);
+    if (form.dotacion_total !== "") payload.dotacion_total = Number(form.dotacion_total);
+    if (form.personal_sindicalizado !== "") payload.personal_sindicalizado = Number(form.personal_sindicalizado);
 
     setCargando(true);
     try {
       if (editId) {
         await api.put(`/negociaciones/${editId}`, payload);
       } else {
-        await api.post(`/negociaciones`, payload);
+        await api.post("/negociaciones", payload);
       }
-
       const rNeg = await api.get("/negociaciones");
-      const arrNeg =
-        (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
+      const arrNeg = (Array.isArray(rNeg.data) ? rNeg.data : rNeg.data?.data) || [];
       setItems(arrNeg.map(normalizarNeg));
       limpiar();
     } catch (err) {
+      // <<< ÚNICO CAMBIO: mostrar emergente sin tocar maqueta >>>
       const st = err?.response?.status;
       const data = err?.response?.data;
-
       if (
         st === 409 &&
         (data?.error === "NEGOCIACION_DUPLICADA" ||
-          /negociaci/i.test(data?.mensaje))
+          /negociaci/i.test(data?.mensaje || ""))
       ) {
         alert(
           data?.mensaje ||
@@ -227,210 +288,218 @@ export default function NegociacionesAdmin() {
           (Array.isArray(data?.errores) && data.errores[0]?.msg) ||
           data?.error ||
           err?.message ||
-          "Error de API al guardar.";
+          "No fue posible guardar.";
         alert(msg);
       }
-
+      // opcional: console.warn para depurar
       console.warn("POST/PUT /negociaciones falló →", st, data || err);
     } finally {
       setCargando(false);
     }
   };
 
-  const filtrados = useMemo(() => {
-    const f = String(filtro || "").trim().toLowerCase();
-    if (!f) return items;
-    return items.filter((x) => {
-      return (
-        String(x.minera || "").toLowerCase().includes(f) ||
-        String(x.empresa || "").toLowerCase().includes(f) ||
-        String(x.rutEmpresa || "").toLowerCase().includes(f) ||
-        String(x.contrato || "").toLowerCase().includes(f) ||
-        String(x.sindicato || "").toLowerCase().includes(f) ||
-        String(x.estado || "").toLowerCase().includes(f)
-      );
-    });
+  // se filtran filas de la tabla en memoria
+  const filas = useMemo(() => {
+    const q = filtro.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((n) =>
+      [n.empresa, n.minera, n.sindicato, n.contrato, n.estado, n.fecha_inicio, n.fecha_termino, n.vencimiento]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q)
+    );
   }, [items, filtro]);
 
+  // render de la vista
   return (
-    <div>
-      <h1>Negociaciones (Admin)</h1>
+    <div className="tarjeta" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <h2>🤝 Negociaciones</h2>
 
-      <form onSubmit={onSubmit}>
-        <div>
-          <label>Empresa</label>
-          <select
-            value={form.id_empresa}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, id_empresa: e.target.value }))
-            }
-          >
-            <option value="">-- Selecciona --</option>
-            {empresas.map((e) => (
-              <option key={e.id_empresa} value={e.id_empresa}>
-                {e.nombre_empresa}
-              </option>
-            ))}
-          </select>
+      {/* formulario */}
+      <form onSubmit={onSubmit} className="formulario">
+        {/* fila 1: empresa y sindicato */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Empresa</label>
+            <select
+              className="input"
+              value={form.id_empresa}
+              onChange={(e) => setForm({ ...form, id_empresa: e.target.value })}
+            >
+              <option value="">Seleccionar Empresa</option>
+              {opcionesEmpresas.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grupo">
+            <label>Sindicato</label>
+            <select
+              className="input"
+              value={form.id_sindicato}
+              onChange={(e) => setForm({ ...form, id_sindicato: e.target.value })}
+            >
+              <option value="">Seleccionar Sindicato</option>
+              {opcionesSindicatos.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label>Sindicato</label>
-          <select
-            value={form.id_sindicato}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, id_sindicato: e.target.value }))
-            }
-          >
-            <option value="">-- Selecciona --</option>
-            {sindicatos.map((s) => (
-              <option key={s.id_sindicato} value={s.id_sindicato}>
-                {s.nombre_sindicato}
-              </option>
-            ))}
-          </select>
+        {/* fila 2: contrato */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Contrato</label>
+            <input
+              className="input"
+              placeholder="Contrato (ej: 0000001)"
+              value={form.contrato}
+              onChange={(e) => setForm({ ...form, contrato: e.target.value })}
+            />
+          </div>
         </div>
 
-        <div>
-          <label>Contrato</label>
-          <input
-            type="text"
-            value={form.contrato}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, contrato: e.target.value }))
-            }
-            maxLength={100}
-            placeholder="Ej: 454000XXXX"
-          />
+        {/* fila 3: fechas del contrato colectivo */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Fecha inicio C. Colectivo</label>
+            <input
+              className="input"
+              type="date"
+              value={form.fecha_inicio}
+              onChange={(e) => setForm({ ...form, fecha_inicio: e.target.value })}
+            />
+          </div>
+          <div className="grupo">
+            <label>F. término C. Colectivo</label>
+            <input
+              className="input"
+              type="date"
+              value={form.fecha_termino}
+              onChange={(e) => setForm({ ...form, fecha_termino: e.target.value })}
+            />
+            {form.fecha_inicio && form.fecha_termino && (() => {
+              const m = monthsDiff(form.fecha_inicio, form.fecha_termino);
+              return Number.isFinite(m) && m >= 0 ? (
+                <small className="nota">Vigencia: {m} meses (máx. 36)</small>
+              ) : null;
+            })()}
+          </div>
         </div>
 
-        <div>
-          <label>Estado</label>
-          <input
-            type="text"
-            value={form.estado}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, estado: e.target.value }))
-            }
-            maxLength={50}
-            placeholder="Abierta / Cerrada"
-          />
+        {/* fila 4: estado de la negociación */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Estado de la nueva negociación</label>
+            <select
+              className="input"
+              value={form.estado}
+              onChange={(e) => setForm({ ...form, estado: e.target.value })}
+            >
+              {ESTADOS.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+           
+          </div>
         </div>
 
-        <div>
-          <label>Fecha inicio</label>
-          <input
-            type="date"
-            value={form.fecha_inicio}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, fecha_inicio: e.target.value }))
-            }
-          />
+        {/* fila 5: vigencia del contrato comercial */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Vigencia contrato comercial</label>
+            <input
+              className="input"
+              type="date"
+              value={form.vencimiento_contrato_comercial}
+              onChange={(e) =>
+                setForm({ ...form, vencimiento_contrato_comercial: e.target.value })
+              }
+            />
+          </div>
         </div>
 
-        <div>
-          <label>Fecha término</label>
-          <input
-            type="date"
-            value={form.fecha_termino}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, fecha_termino: e.target.value }))
-            }
-          />
+        {/* fila 6: datos numéricos (sin % sindicalizado) */}
+        <div className="form-row">
+          <div className="grupo">
+            <label>Dotación total</label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              placeholder="Dotación total"
+              value={form.dotacion_total}
+              onChange={(e) => setForm({ ...form, dotacion_total: e.target.value })}
+            />
+          </div>
+          <div className="grupo">
+            <label>Personal sindicalizado</label>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              placeholder="Personal sindicalizado"
+              value={form.personal_sindicalizado}
+              onChange={(e) =>
+                setForm({ ...form, personal_sindicalizado: e.target.value })
+              }
+            />
+          </div>
         </div>
 
-        <div>
-          <label>Venc. contrato comercial</label>
-          <input
-            type="date"
-            value={form.vencimiento_contrato_comercial}
-            onChange={(e) =>
-              setForm((s) => ({
-                ...s,
-                vencimiento_contrato_comercial: e.target.value,
-              }))
-            }
-          />
-        </div>
-
-        <div>
-          <label>Dotación total</label>
-          <input
-            type="number"
-            min="0"
-            value={form.dotacion_total}
-            onChange={(e) =>
-              setForm((s) => ({ ...s, dotacion_total: e.target.value }))
-            }
-          />
-        </div>
-
-        <div>
-          <label>Personal sindicalizado</label>
-          <input
-            type="number"
-            min="0"
-            value={form.personal_sindicalizado}
-            onChange={(e) =>
-              setForm((s) => ({
-                ...s,
-                personal_sindicalizado: e.target.value,
-              }))
-            }
-          />
-        </div>
-
-        <div>
-          <button type="submit" disabled={cargando}>
+        {/* botones */}
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primario" disabled={cargando}>
             {editId ? "Actualizar" : "Guardar"}
           </button>
-          <button type="button" onClick={limpiar} disabled={cargando}>
+          <button type="button" className="btn" onClick={limpiar} disabled={cargando}>
             Limpiar
           </button>
         </div>
       </form>
 
-      <div>
-        <div>
+      {/* cabecera con buscador */}
+      <div className="cabecera-seccion">
+        <h3 className="titulo-seccion">Listado</h3>
+        <div className="grupo" style={{ maxWidth: 260 }}>
+          <label>Buscar</label>
           <input
-            placeholder="Filtrar por texto…"
+            className="input"
+            placeholder="Por empresa, minera, sindicato o contrato…"
             value={filtro}
             onChange={(e) => setFiltro(e.target.value)}
           />
-          <button onClick={cargarTodo} disabled={cargando}>
-            Recargar
-          </button>
         </div>
+      </div>
 
-        <table>
+      {/* tabla (listado simplificado) */}
+      <div className="tabla-responsive">
+        <table className="tabla">
           <thead>
             <tr>
-              <th>#</th>
               <th>Minera</th>
               <th>Empresa</th>
-              <th>RUT</th>
-              <th>Contrato</th>
               <th>Sindicato</th>
-              <th>Estado</th>
+              <th>Contrato</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {filtrados.map((it) => (
-              <tr key={it.id_negociacion}>
-                <td>{it.id_negociacion}</td>
-                <td>{it.minera}</td>
-                <td>{it.empresa}</td>
-                <td>{it.rutEmpresa}</td>
-                <td>{it.contrato}</td>
-                <td>{it.sindicato}</td>
-                <td>{it.estado}</td>
-                <td>
-                  <button onClick={() => onEditar(it)} disabled={cargando}>
+            {filas.map((n) => (
+              <tr key={n.id}>
+                <td>{n.minera || "-"}</td>
+                <td>{n.empresa || "-"}</td>
+                <td>{n.sindicato || "-"}</td>
+                <td>{n.contrato || "-"}</td>
+                <td className="col-acciones">
+                  <button className="btn btn-mini" onClick={() => onEditar(n)} disabled={cargando}>
                     Editar
                   </button>
                   <button
-                    onClick={() => onEliminar(it.id_negociacion)}
+                    className="btn btn-mini btn-peligro"
+                    onClick={() => onEliminar(n)}
                     disabled={cargando}
                   >
                     Eliminar
@@ -438,9 +507,9 @@ export default function NegociacionesAdmin() {
                 </td>
               </tr>
             ))}
-            {filtrados.length === 0 && (
+            {filas.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: "center" }}>
+                <td className="sin-datos" colSpan={5}>
                   Sin resultados
                 </td>
               </tr>
@@ -448,6 +517,12 @@ export default function NegociacionesAdmin() {
           </tbody>
         </table>
       </div>
+
+      {cargando && (
+        <small className="nota" style={{ display: "block", marginTop: 8 }}>
+          Procesando…
+        </small>
+      )}
     </div>
   );
 }
